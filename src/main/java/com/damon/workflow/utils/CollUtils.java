@@ -2,7 +2,7 @@ package com.damon.workflow.utils;
 
 import java.util.Collection;
 
-public class CollectionUtils {
+public class CollUtils {
 
     public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();

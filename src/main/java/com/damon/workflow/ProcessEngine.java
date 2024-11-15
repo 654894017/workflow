@@ -17,7 +17,7 @@ import com.damon.workflow.task.StartTask;
 import com.damon.workflow.task.UserTask;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.ClasspathFileUtils;
-import com.damon.workflow.utils.CollectionUtils;
+import com.damon.workflow.utils.CollUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -121,15 +121,15 @@ public class ProcessEngine {
         RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables);
         List<State> nextStatues = findNextStates(processDefinition, currentState, context);
         if (isEndedProcess(processId, currentState, nextStatues)) {
-            return new ProcessResult(true);
+            return new ProcessResult(true, currentState, nextStatues);
         }
         return new ProcessResult(currentState, nextStatues);
     }
 
     private boolean isEndedProcess(String processId, State currentState, List<State> nextStatues) {
-        if (CollectionUtils.isNotEmpty(nextStatues) && !nextStatues.get(0).getType().equals(ProcessConstant.END)) {
+        if (CollUtils.isNotEmpty(nextStatues) && !nextStatues.get(0).getType().equals(ProcessConstant.END)) {
             return false;
-        } else if (CollectionUtils.isNotEmpty(nextStatues) && nextStatues.get(0).getType().equals(ProcessConstant.END)) {
+        } else if (CollUtils.isNotEmpty(nextStatues) && nextStatues.get(0).getType().equals(ProcessConstant.END)) {
             return true;
         }
         throw new ProcessException("流程ID: " + processId + ", 任务ID: " + currentState.getId() + ", 异常结束,请确认流程设计是否正确");

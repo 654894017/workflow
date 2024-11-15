@@ -7,7 +7,7 @@ import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.utils.CaseInsensitiveMap;
-import com.damon.workflow.utils.CollectionUtils;
+import com.damon.workflow.utils.CollUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class ExclusiveGateway implements IGateway {
                 nextStates.add(nextState);
             }
         }
-        if (CollectionUtils.isEmpty(nextStates)) {
+        if (CollUtils.isEmpty(nextStates)) {
             throw new ProcessException("未满足任何条件的网关节点: " + gatewayState.getId());
         }
         return nextStates;
