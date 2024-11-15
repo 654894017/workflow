@@ -11,7 +11,10 @@ import com.damon.workflow.gateway.ExclusiveGateway;
 import com.damon.workflow.gateway.IGateway;
 import com.damon.workflow.gateway.ParallelEndGateway;
 import com.damon.workflow.gateway.ParallelStartGateway;
-import com.damon.workflow.task.*;
+import com.damon.workflow.task.EndTask;
+import com.damon.workflow.task.ITask;
+import com.damon.workflow.task.StartTask;
+import com.damon.workflow.task.UserTask;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.ClasspathFileUtils;
 import com.damon.workflow.utils.CollectionUtils;
@@ -146,7 +149,6 @@ public class ProcessEngine {
         return nextStates;
     }
 
-
     /**
      * 递归查找后续节点
      */
@@ -157,15 +159,15 @@ public class ProcessEngine {
         }
         String currentType = currentState.getType();
         if (ProcessConstant.EXCLUSIVE_GATEWAY.equals(currentState.getType())) {
-            handleExclusiveGateway(processDefinition, currentState, context, result);
+            handleGateway(processDefinition, currentState, context, result);
         } else if (currentType.equals(ProcessConstant.PARALLEL_START_GATEWAY)) {
-            handleParallelStartGateway(processDefinition, currentState, context, result);
+            handleGateway(processDefinition, currentState, context, result);
         } else if (ProcessConstant.PARALLEL_END_GATEWAY.equals(currentState.getType())) {
             handleParallelEndGateway(processDefinition, currentState, context, result);
         } else if (ProcessConstant.END.equals(currentState.getType())) {
-            handleEnd(processDefinition, currentState, context,  result);
-        }else {
-            if (!isInitiator && ProcessConstant.isTask(currentType)) {
+            handleEnd(processDefinition, currentState, context, result);
+        } else {
+            if (!isInitiator && ProcessConstant.isTaskState(currentType)) {
                 result.add(currentState);
             } else {
                 if (currentState.getNextState() != null) {
@@ -177,21 +179,12 @@ public class ProcessEngine {
         }
     }
 
-
-    private void handleParallelStartGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
-        IGateway gateway = globalGateway.get(gatewayState.getType());
-        Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
-        nextStates.forEach(state -> {
-            RuntimeContext nextContext = new RuntimeContext(processDefinition, state, context.getVariables());
-            findNextStatesRecursive(processDefinition, state, nextContext, result, false);
-        });
-    }
-
     private void handleEnd(ProcessDefinition processDefinition, State endState, RuntimeContext context, List<State> result) {
         ITask endTask = globalTask.get(endState.getType());
         State nextState = endTask.execute(new RuntimeContext(processDefinition, endState, context.getVariables()));
         result.add(nextState);
     }
+
     private void handleParallelEndGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
         IGateway gateway = globalGateway.get(gatewayState.getType());
         Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
@@ -205,12 +198,12 @@ public class ProcessEngine {
         });
     }
 
-    private void handleExclusiveGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
+    private void handleGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
         IGateway gateway = globalGateway.get(gatewayState.getType());
         Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
         nextStates.forEach(state -> {
-                RuntimeContext nextContext = new RuntimeContext(processDefinition, state, context.getVariables());
-                findNextStatesRecursive(processDefinition, state, nextContext, result, false);
+            RuntimeContext nextContext = new RuntimeContext(processDefinition, state, context.getVariables());
+            findNextStatesRecursive(processDefinition, state, nextContext, result, false);
         });
     }
 }

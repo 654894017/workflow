@@ -25,7 +25,7 @@ public class WorkflowParallelGatewayTest {
             System.out.println(state.getId());
         }
         State state1 = new ArrayList<>(result.getNextStates()).get(0);
-        Map<String,Object> params2 = new HashMap<>();
+        Map<String, Object> params2 = new HashMap<>();
         params2.put("test", false);
         ProcessResult result2 = engine.process("performanceReview", state1.getId(), params2);
         System.out.println("----------------");
@@ -34,12 +34,12 @@ public class WorkflowParallelGatewayTest {
         }
 
         State state2 = new ArrayList<>(result.getNextStates()).get(1);
-        Map<String,Object> params3 = new HashMap<>();
+        Map<String, Object> params3 = new HashMap<>();
         params3.put("test", true);
         ProcessResult result3 = engine.process("performanceReview", state2.getId(), params3);
         System.out.println("----------------");
         System.out.println(result3.isCompleted());
-        if(!result3.isCompleted()){
+        if (!result3.isCompleted()) {
             for (State state : result3.getNextStates()) {
                 System.out.println(state.getId());
             }

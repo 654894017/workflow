@@ -21,6 +21,7 @@ public class ParallelStartGateway implements IGateway {
     public ParallelStartGateway(CaseInsensitiveMap<IEvaluator> evaluatorMap) {
         this.evaluatorMap = evaluatorMap;
     }
+
     @Override
     public Set<State> execute(RuntimeContext context) {
         Set<State> nextStates = new HashSet<>();

@@ -40,7 +40,7 @@ public class ExclusiveGateway implements IGateway {
                 nextStates.add(nextState);
             }
         }
-        if(CollectionUtils.isEmpty(nextStates)){
+        if (CollectionUtils.isEmpty(nextStates)) {
             throw new ProcessException("未满足任何条件的网关节点: " + gatewayState.getId());
         }
         return nextStates;
