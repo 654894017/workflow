@@ -1,0 +1,51 @@
+processDefinition:
+  id: "performanceReview"
+  startState: "Start"
+  states:
+    - id: "Start"
+      type: "Start"
+      nextState: "ReviewGateway"
+      assigneeRole: "Manager"
+      assigneeUser: "181987"
+      extendInformation:
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
+
+    - id: "ReviewGateway"
+      type: "ExclusiveGateway"
+      conditions:
+        - condition: "employeePerformance > 80"
+          nextState: "HighPerformanceReview"
+          scriptType: "JavaScript"
+        - condition: "employeePerformance <= 80"
+          nextState: "StandardReview"
+          scriptType: "JavaScript"
+
+    - id: "HighPerformanceReview"
+      type: "UserTask"
+      assigneeRole: "Manager"
+      assigneeUser: "181989"
+      nextState: "End"
+      extendInformation:
+        allowEditingResouces:
+          - evaluation_info
+          - performance_level
+        actions:
+          - agree
+          - reject
+
+    - id: "StandardReview"
+      type: "UserTask"
+      assigneeRole: "Manager"
+      assigneeUser: "181990"
+      nextState: "End"
+      extendInformation:
+        allowEditingResouces:
+        actions:
+          - agree
+          - reject
+    - id: "End"
+      type: "End"
+      nextState: null
