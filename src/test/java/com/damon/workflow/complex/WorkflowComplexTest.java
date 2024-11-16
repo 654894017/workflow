@@ -1,15 +1,20 @@
-package com.damon.workflow;
+package com.damon.workflow.complex;
 
+import com.damon.workflow.ProcessEngine;
+import com.damon.workflow.ProcessResult;
 import com.damon.workflow.config.State;
 import com.damon.workflow.utils.ClasspathFileUtils;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WorkflowComplex2Test {
-    public static void main(String[] args) {
+public class WorkflowComplexTest {
+    @Test
+    public void test() {
         ProcessEngine engine = new ProcessEngine();
+        String PROCESS_ID = "performanceReview";
         engine.registerProcessFromCallback("performanceReview", processId -> {
             return ClasspathFileUtils.readFileAsString("WorkflowComplex.yaml");
         });
@@ -21,7 +26,7 @@ public class WorkflowComplex2Test {
         }
         State state1 = new ArrayList<>(result.getNextStates()).get(0);
         Map<String, Object> params2 = new HashMap<>();
-        params2.put("a", 90);
+        params2.put("a", 60);
         ProcessResult result2 = engine.process("performanceReview", state1.getId(), params2);
         System.out.println("----------------");
         for (State state : result2.getNextStates()) {

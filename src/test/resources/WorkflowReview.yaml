@@ -1,0 +1,60 @@
+processDefinition:
+  id: "Review"
+  startState: "Start"
+  states:
+    - id: "Start"
+      type: "UserTask"
+      nextState: "ReviewGateway"
+      assigneeRole: "Manager"
+      assigneeUser: "181987"
+      extendInformation:
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
+    - id: "ReviewGateway"
+      type: "ExclusiveGateway"
+      nextState: null
+      conditions:
+        - condition: "a>85"
+          nextState: "UserTask3"
+          scriptType: "JavaScript"
+        - condition: "a<=85"
+          nextState: "ReviewGateway2"
+          scriptType: "JavaScript"
+    - id: "ReviewGateway2"
+      type: "ExclusiveGateway"
+      nextState: null
+      conditions:
+        - condition: "a<85"
+          nextState: "UserTask4"
+          scriptType: "JavaScript"
+        - condition: "a>85"
+          nextState: "End"
+          scriptType: "JavaScript"
+
+
+    - id: "UserTask3"
+      type: "UserTask"
+      nextState: "End"
+      assigneeRole: "Manager"
+      assigneeUser: "181987"
+      extendInformation:
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
+
+    - id: "UserTask4"
+      type: "UserTask"
+      nextState: "End"
+      assigneeRole: "Manager"
+      assigneeUser: "181987"
+      extendInformation:
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
+    - id: "End"
+      type: "End"
+      nextState: null

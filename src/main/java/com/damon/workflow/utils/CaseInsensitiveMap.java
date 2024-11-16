@@ -1,7 +1,7 @@
 package com.damon.workflow.utils;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 忽略key大小写的Map
@@ -9,7 +9,7 @@ import java.util.Map;
  * @param <V>
  */
 public class CaseInsensitiveMap<V> {
-    private final Map<String, V> map = new HashMap<>();
+    private final Map<String, V> map = new ConcurrentHashMap<>();
 
     public void put(String key, V value) {
         map.put(key.toLowerCase(), value);

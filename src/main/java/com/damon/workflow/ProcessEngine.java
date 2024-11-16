@@ -22,33 +22,48 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.*;
 
 public class ProcessEngine {
     private final CaseInsensitiveMap<ProcessConfig> configs = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<ITask> globalTask = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IGateway> globalGateway = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap = new CaseInsensitiveMap<>();
-    private final CaseInsensitiveMap<Function<String, String>> processDefinitionCallMap = new CaseInsensitiveMap<>();
+    private final CaseInsensitiveMap<IProcesDefinitionCallback> processDefinitionCallMap = new CaseInsensitiveMap<>();
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    private final CaseInsensitiveMap<IProcessor> processorsMap = new CaseInsensitiveMap<>();
+    private final CaseInsensitiveMap<IConditionParser> conditionsMap = new CaseInsensitiveMap<>();
 
     public ProcessEngine() {
         globalTask.put(ProcessConstant.USER_TASK, new UserTask());
         globalTask.put(ProcessConstant.START, new StartTask());
         globalTask.put(ProcessConstant.END, new EndTask());
-        globalGateway.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap));
-        globalGateway.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap));
-        globalGateway.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap));
+        globalGateway.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap, conditionsMap));
+        globalGateway.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap, conditionsMap));
+        globalGateway.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap, conditionsMap));
         evaluatorMap.put(ProcessConstant.DEFAULT_EVALUATOR, new JavaScriptEvaluator());
     }
 
-    public void registerTask(ITask task) {
-        globalTask.put(task.getName(), task);
+    public void registerConditionParsers(String processId, IConditionParser... parsers) {
+        for (IConditionParser parser : parsers) {
+            String processStateId = processId + ":" + parser.getClass().getName();
+            conditionsMap.put(processStateId, parser);
+        }
     }
+
+    public void registerTasks(ITask... tasks) {
+        Arrays.stream(tasks).forEach(task -> globalTask.put(task.getName(), task));
+    }
+
+    public void registerProcessors(String processId, IProcessor... processors) {
+        for (IProcessor<?> processor : processors) {
+            processor.stateIds().forEach(stateId -> {
+                String processStateId = processId + ":" + stateId;
+                processorsMap.put(processStateId, processor);
+            });
+        }
+    }
+
 
     public void registerEvaluator(IEvaluator evaluator) {
         evaluatorMap.put(evaluator.getName(), evaluator);
@@ -69,8 +84,8 @@ public class ProcessEngine {
         this.registerProcess(processId, content);
     }
 
-    public void registerProcessFromCallback(String processId, Function<String, String> callback) {
-        String content = callback.apply(processId);
+    public void registerProcessFromCallback(String processId, IProcesDefinitionCallback callback) {
+        String content = callback.callback(processId);
         processDefinitionCallMap.put(processId, callback);
         this.registerProcess(processId, content);
     }
@@ -85,7 +100,7 @@ public class ProcessEngine {
     public ProcessResult process(String processId, Map<String, Object> variables) {
         ProcessConfig config = configs.get(processId);
         if (config == null) {
-            String processDefinition = processDefinitionCallMap.get(processId).apply(processId);
+            String processDefinition = processDefinitionCallMap.get(processId).callback(processId);
             registerProcess(processId, processDefinition);
         }
         return process(processId, config.getProcessDefinition().getStartState(), variables);
@@ -114,16 +129,21 @@ public class ProcessEngine {
         }
         String currentStateType = currentState.getType();
         ITask task = globalTask.get(currentStateType);
-        task.execute(new RuntimeContext(processDefinition, currentState, variables));
         if (task == null) {
             throw new ProcessException("未找到任务类型: " + currentState.getType());
         }
         RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables);
+        task.execute(context);
+        Object result = getStateProcessResult(currentStateId, context);
         List<State> nextStatues = findNextStates(processDefinition, currentState, context);
-        if (isEndedProcess(processId, currentState, nextStatues)) {
-            return new ProcessResult(true, currentState, nextStatues);
-        }
-        return new ProcessResult(currentState, nextStatues);
+        return new ProcessResult(processId, currentState, nextStatues, result);
+    }
+
+    private Object getStateProcessResult(String currentStateId, RuntimeContext context) {
+        String processStateId = context.getProcessDefinition().getId() + ":" + currentStateId;
+        return Optional.ofNullable(processorsMap.get(processStateId))
+                .map(processor -> processor.process(context))
+                .orElse(null);
     }
 
     private boolean isEndedProcess(String processId, State currentState, List<State> nextStatues) {

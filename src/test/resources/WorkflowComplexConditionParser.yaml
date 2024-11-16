@@ -27,10 +27,9 @@ processDefinition:
       type: "ExclusiveGateway"
       nextState: null
       conditions:
-        - condition: "a>85"
+        - nextStateConditionParser: "com.damon.workflow.complex.parser.HighPerformanceReviewConditionParser"
           nextState: "HighPerformanceReview"
-          scriptType: "JavaScript"
-        - condition: "a<=85"
+        - nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
           nextState: "StandardReview"
           scriptType: "JavaScript"
 
@@ -107,8 +106,7 @@ processDefinition:
 
     - id: "ParallelEndGateway"
       type: "ParallelEndGateway"
-      nextStateCondition: "test"
-      nextStateConditionScriptType: "JavaScript"
+      nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
       nextState: "End"
       extendInformation:
         allowEditingResouces:

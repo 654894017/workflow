@@ -6,7 +6,6 @@ import java.util.Objects;
 public class State {
     private String id;
     private String type;
-    // private String gatewayType;
     private String assigneeRole;
     private String assigneeUser;
     private String requiredStatus;
@@ -15,6 +14,7 @@ public class State {
     private String nextState;
     private String nextStateCondition;
     private String nextStateConditionScriptType;
+    private String nextStateConditionParser;
 
     public String getId() {
         return id;
@@ -72,14 +72,6 @@ public class State {
         this.extendInformation = extendInformation;
     }
 
-//    public String getGatewayType() {
-//        return gatewayType;
-//    }
-//
-//    public void setGatewayType(String gatewayType) {
-//        this.gatewayType = gatewayType;
-//    }
-
     public String getType() {
         return type;
     }
@@ -102,6 +94,14 @@ public class State {
 
     public void setNextStateConditionScriptType(String nextStateConditionScriptType) {
         this.nextStateConditionScriptType = nextStateConditionScriptType;
+    }
+
+    public String getNextStateConditionParser() {
+        return nextStateConditionParser;
+    }
+
+    public void setNextStateConditionParser(String nextStateConditionParser) {
+        this.nextStateConditionParser = nextStateConditionParser;
     }
 
     @Override
