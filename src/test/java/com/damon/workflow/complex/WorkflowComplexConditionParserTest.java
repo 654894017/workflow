@@ -17,12 +17,8 @@ import java.util.Map;
 public class WorkflowComplexConditionParserTest {
     @Test
     public void test() {
-        ProcessEngine engine = new ProcessEngine();
-        String PROCESS_ID = "performanceReview";
-        engine.registerProcessFromCallback("performanceReview", processId -> {
-            return ClasspathFileUtils.readFileAsString("WorkflowComplexConditionParser.yaml");
-        });
-        engine.registerProcessors(PROCESS_ID,
+        ProcessEngine engine = new ProcessEngine(ClasspathFileUtils.readFileAsString("WorkflowComplexConditionParser.yaml"));
+        engine.registerProcessors(
                 new StartProcessor(),
                 new HighPerformanceReviewProcessor(),
                 new StandardReviewProcessor(),
@@ -32,13 +28,13 @@ public class WorkflowComplexConditionParserTest {
                 new UserTask4Processor()
 
         );
-        engine.registerConditionParsers(PROCESS_ID,
+        engine.registerConditionParsers(
                 new HighPerformanceReviewConditionParser(),
                 new StandardReviewConditionParser(),
                 new ParallelEndConditionParser()
         );
 
-        ProcessResult result = engine.process("performanceReview", new HashMap<>());
+        ProcessResult result = engine.process(new HashMap<>());
         System.out.println("----------------");
         for (State state : result.getNextStates()) {
             System.out.println(state.getId());
@@ -46,14 +42,14 @@ public class WorkflowComplexConditionParserTest {
         State state1 = new ArrayList<>(result.getNextStates()).get(0);
         Map<String, Object> params2 = new HashMap<>();
         params2.put("employeePerformance", 60);
-        ProcessResult result2 = engine.process("performanceReview", state1.getId(), params2);
+        ProcessResult result2 = engine.process(state1.getId(), params2);
         System.out.println("----------------");
         for (State state : result2.getNextStates()) {
             System.out.println(state.getId());
         }
 
         State state2 = new ArrayList<>(result2.getNextStates()).get(0);
-        ProcessResult result3 = engine.process("performanceReview", state2.getId(), params2);
+        ProcessResult result3 = engine.process(state2.getId(), params2);
         System.out.println("----------------");
         for (State state : result3.getNextStates()) {
             System.out.println(state.getId());
@@ -61,7 +57,7 @@ public class WorkflowComplexConditionParserTest {
 
 
         State state3 = new ArrayList<>(result3.getNextStates()).get(0);
-        ProcessResult result4 = engine.process("performanceReview", state3.getId(), new HashMap<>());
+        ProcessResult result4 = engine.process(state3.getId(), new HashMap<>());
         System.out.println("----------------");
         for (State state : result4.getNextStates()) {
             System.out.println(state.getId());
@@ -73,14 +69,14 @@ public class WorkflowComplexConditionParserTest {
 
         HashMap params4 = new HashMap<>();
         params4.put("employeePerformance", 90);
-        ProcessResult result5 = engine.process("performanceReview", state4.getId(), params4);
+        ProcessResult result5 = engine.process(state4.getId(), params4);
         System.out.println("----------------");
         for (State state : result5.getNextStates()) {
             System.out.println(state.getId());
         }
         HashMap params5 = new HashMap<>();
         params5.put("employeePerformance", 50);
-        ProcessResult result6 = engine.process("performanceReview", state5.getId(), params5);
+        ProcessResult result6 = engine.process(state5.getId(), params5);
         for (State state : result6.getNextStates()) {
             System.out.println(state.getId());
         }

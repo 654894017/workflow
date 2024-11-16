@@ -23,6 +23,10 @@ public class CaseInsensitiveMap<V> {
         return map;
     }
 
+    public boolean containsKey(String key) {
+        return map.containsKey(key.toLowerCase());
+    }
+
     public V getOrDefault(String key, V value) {
         return map.getOrDefault(key.toLowerCase(), value);
     }

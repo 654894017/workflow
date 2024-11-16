@@ -35,7 +35,7 @@ public class ParallelEndGateway implements IGateway {
         Set<State> nextStates = new HashSet<>();
         boolean result;
         if (StrUtils.isNotEmpty(currentState.getNextStateConditionParser())) {
-            IConditionParser conditionParser = conditionMap.get(processId + ":" + currentState.getNextStateConditionParser());
+            IConditionParser conditionParser = conditionMap.get(currentState.getNextStateConditionParser());
             if (conditionParser == null) {
                 throw new ProcessException("未找到条件解析器: " + currentState.getNextStateConditionParser());
             }

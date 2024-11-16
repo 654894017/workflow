@@ -31,13 +31,12 @@ public class ExclusiveGateway implements IGateway {
     @Override
     public Set<State> execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
-        String processId = processDefinition.getId();
         State gatewayState = context.getCurrentState();
         Set<State> nextStates = new HashSet<>();
         for (Condition condition : gatewayState.getConditions()) {
             boolean result;
             if (StrUtils.isNotEmpty(condition.getNextStateConditionParser())) {
-                IConditionParser conditionParser = conditionMap.get(processId + ":" + condition.getNextStateConditionParser());
+                IConditionParser conditionParser = conditionMap.get(condition.getNextStateConditionParser());
                 if (conditionParser == null) {
                     throw new ProcessException("未找到条件解析器: " + condition.getNextStateConditionParser());
                 }

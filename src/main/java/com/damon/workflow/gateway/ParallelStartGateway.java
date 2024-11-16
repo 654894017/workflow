@@ -36,7 +36,7 @@ public class ParallelStartGateway implements IGateway {
         for (Condition condition : state.getConditions()) {
             boolean result;
             if (StrUtils.isNotEmpty(condition.getNextStateConditionParser())) {
-                IConditionParser conditionParser = conditionMap.get(processId + ":" + condition.getNextStateConditionParser());
+                IConditionParser conditionParser = conditionMap.get(condition.getNextStateConditionParser());
                 if (conditionParser == null) {
                     throw new ProcessException("未找到条件解析器: " + condition.getNextStateConditionParser());
                 }

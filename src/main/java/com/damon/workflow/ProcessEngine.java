@@ -16,25 +16,21 @@ import com.damon.workflow.task.ITask;
 import com.damon.workflow.task.StartTask;
 import com.damon.workflow.task.UserTask;
 import com.damon.workflow.utils.CaseInsensitiveMap;
-import com.damon.workflow.utils.ClasspathFileUtils;
-import com.damon.workflow.utils.CollUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.damon.workflow.utils.YamlUtils;
 
-import java.io.IOException;
 import java.util.*;
 
 public class ProcessEngine {
-    private final CaseInsensitiveMap<ProcessConfig> configs = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<ITask> globalTask = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IGateway> globalGateway = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap = new CaseInsensitiveMap<>();
-    private final CaseInsensitiveMap<IProcesDefinitionCallback> processDefinitionCallMap = new CaseInsensitiveMap<>();
-    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     private final CaseInsensitiveMap<IProcessor> processorsMap = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IConditionParser> conditionsMap = new CaseInsensitiveMap<>();
+    private final ProcessConfig config;
+    private final String processId;
+    private IProcesDefinitionCallback processDefinitionCallback;
 
-    public ProcessEngine() {
+    public ProcessEngine(String content) {
         globalTask.put(ProcessConstant.USER_TASK, new UserTask());
         globalTask.put(ProcessConstant.START, new StartTask());
         globalTask.put(ProcessConstant.END, new EndTask());
@@ -42,12 +38,13 @@ public class ProcessEngine {
         globalGateway.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap, conditionsMap));
         globalGateway.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap, conditionsMap));
         evaluatorMap.put(ProcessConstant.DEFAULT_EVALUATOR, new JavaScriptEvaluator());
+        this.config = YamlUtils.load(content, ProcessConfig.class);
+        this.processId = config.getProcessDefinition().getId();
     }
 
-    public void registerConditionParsers(String processId, IConditionParser... parsers) {
+    public void registerConditionParsers(IConditionParser... parsers) {
         for (IConditionParser parser : parsers) {
-            String processStateId = processId + ":" + parser.getClass().getName();
-            conditionsMap.put(processStateId, parser);
+            conditionsMap.put(parser.getClass().getName(), parser);
         }
     }
 
@@ -55,11 +52,13 @@ public class ProcessEngine {
         Arrays.stream(tasks).forEach(task -> globalTask.put(task.getName(), task));
     }
 
-    public void registerProcessors(String processId, IProcessor... processors) {
+    public void registerProcessors(IProcessor... processors) {
         for (IProcessor<?> processor : processors) {
             processor.stateIds().forEach(stateId -> {
-                String processStateId = processId + ":" + stateId;
-                processorsMap.put(processStateId, processor);
+                if (processorsMap.containsKey(stateId)) {
+                    throw new ProcessException("Processor stateId 重复定义，请检查配置文件，stateId: " + stateId);
+                }
+                processorsMap.put(stateId, processor);
             });
         }
     }
@@ -69,56 +68,24 @@ public class ProcessEngine {
         evaluatorMap.put(evaluator.getName(), evaluator);
     }
 
-
-    public void registerProcess(String processId, String content) {
-        try {
-            ProcessConfig config = mapper.readValue(content, ProcessConfig.class);
-            configs.put(processId, config);
-        } catch (IOException e) {
-            throw new ProcessException("获取流程实例配置异常", e);
-        }
-    }
-
-    public void registerProcessFromClasspath(String processId, String yamlFile) {
-        String content = ClasspathFileUtils.readFileAsString(yamlFile);
-        this.registerProcess(processId, content);
-    }
-
-    public void registerProcessFromCallback(String processId, IProcesDefinitionCallback callback) {
-        String content = callback.callback(processId);
-        processDefinitionCallMap.put(processId, callback);
-        this.registerProcess(processId, content);
-    }
-
     /**
      * 开启流程
      *
-     * @param processId
      * @param variables
      * @return
      */
-    public ProcessResult process(String processId, Map<String, Object> variables) {
-        ProcessConfig config = configs.get(processId);
-        if (config == null) {
-            String processDefinition = processDefinitionCallMap.get(processId).callback(processId);
-            registerProcess(processId, processDefinition);
-        }
-        return process(processId, config.getProcessDefinition().getStartState(), variables);
+    public ProcessResult process(Map<String, Object> variables) {
+        return process(config.getProcessDefinition().getStartState(), variables);
     }
 
     /**
      * 流程处理
      *
-     * @param processId
      * @param currentStateId
      * @param variables
      * @return
      */
-    public ProcessResult process(String processId, String currentStateId, Map<String, Object> variables) {
-        ProcessConfig config = configs.get(processId);
-        if (config == null) {
-            throw new ProcessException("无效的流程ID: " + processId);
-        }
+    public ProcessResult process(String currentStateId, Map<String, Object> variables) {
         ProcessDefinition processDefinition = config.getProcessDefinition();
         if (processDefinition == null) {
             throw new ProcessException("流程ID: " + processId + ", 未配置流程信息");
@@ -140,19 +107,9 @@ public class ProcessEngine {
     }
 
     private Object getStateProcessResult(String currentStateId, RuntimeContext context) {
-        String processStateId = context.getProcessDefinition().getId() + ":" + currentStateId;
-        return Optional.ofNullable(processorsMap.get(processStateId))
+        return Optional.ofNullable(processorsMap.get(currentStateId))
                 .map(processor -> processor.process(context))
                 .orElse(null);
-    }
-
-    private boolean isEndedProcess(String processId, State currentState, List<State> nextStatues) {
-        if (CollUtils.isNotEmpty(nextStatues) && !nextStatues.get(0).getType().equals(ProcessConstant.END)) {
-            return false;
-        } else if (CollUtils.isNotEmpty(nextStatues) && nextStatues.get(0).getType().equals(ProcessConstant.END)) {
-            return true;
-        }
-        throw new ProcessException("流程ID: " + processId + ", 任务ID: " + currentState.getId() + ", 异常结束,请确认流程设计是否正确");
     }
 
     /**
