@@ -43,12 +43,11 @@ public class ProcessEngine {
 
     public void registerConditionParsers(IConditionParser... parsers) {
         for (IConditionParser parser : parsers) {
+            if (conditionsMap.containsKey(parser.getClass().getName())) {
+                throw new ProcessException("ConditionParser name 重复定义，请检查配置文件，name: " + parser.getClass().getName());
+            }
             conditionsMap.put(parser.getClass().getName(), parser);
         }
-    }
-
-    public void registerTasks(ITask... tasks) {
-        Arrays.stream(tasks).forEach(task -> globalTask.put(task.getName(), task));
     }
 
     public void registerProcessors(IProcessor... processors) {
@@ -61,7 +60,6 @@ public class ProcessEngine {
             });
         }
     }
-
 
     public void registerEvaluator(IEvaluator evaluator) {
         evaluatorMap.put(evaluator.getName(), evaluator);
