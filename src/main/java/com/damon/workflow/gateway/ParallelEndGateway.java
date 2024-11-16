@@ -53,6 +53,12 @@ public class ParallelEndGateway implements IGateway {
         } else {
             nextStates.add(currentState);
         }
+        nextStates.forEach(nextState -> {
+            logger.info("processId: {}, {}: {}, nextState:{}, variables: {}",
+                    processDefinition.getId(), getName(), currentState.getId(), nextState.getId(),
+                    context.getVariables()
+            );
+        });
         return nextStates;
     }
 

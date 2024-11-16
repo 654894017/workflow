@@ -54,6 +54,12 @@ public class ParallelStartGateway implements IGateway {
                 nextStates.add(nextState);
             }
         }
+        nextStates.forEach(nextState -> {
+            logger.info("processId: {}, {}: {}, nextState:{}, variables: {}",
+                    processDefinition.getId(), getName(), state.getId(), nextState.getId(),
+                    context.getVariables()
+            );
+        });
         return nextStates;
     }
 
