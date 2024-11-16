@@ -28,7 +28,6 @@ public class ProcessEngine {
     private final CaseInsensitiveMap<IConditionParser> conditionsMap = new CaseInsensitiveMap<>();
     private final ProcessConfig config;
     private final String processId;
-    private IProcesDefinitionCallback processDefinitionCallback;
 
     public ProcessEngine(String content) {
         globalTask.put(ProcessConstant.USER_TASK, new UserTask());
