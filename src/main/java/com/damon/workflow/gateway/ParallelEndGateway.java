@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class ParallelEndGateway implements IGateway {
 
-    private final Logger logger = LoggerFactory.getLogger(ParallelStartGateway.class);
+    private final Logger logger = LoggerFactory.getLogger(ParallelEndGateway.class);
 
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
 

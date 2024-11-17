@@ -65,6 +65,6 @@ public class ParallelStartGateway implements IGateway {
 
     @Override
     public String getName() {
-        return "ParallelEndGateway";
+        return "ParallelStartGateway";
     }
 }

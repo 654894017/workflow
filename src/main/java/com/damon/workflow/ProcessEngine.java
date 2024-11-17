@@ -18,7 +18,10 @@ import com.damon.workflow.task.UserTask;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.YamlUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ProcessEngine {
     private final CaseInsensitiveMap<ITask> globalTask = new CaseInsensitiveMap<>();
@@ -30,9 +33,9 @@ public class ProcessEngine {
     private final String processId;
 
     public ProcessEngine(String content) {
-        globalTask.put(ProcessConstant.USER_TASK, new UserTask());
-        globalTask.put(ProcessConstant.START, new StartTask());
-        globalTask.put(ProcessConstant.END, new EndTask());
+        globalTask.put(ProcessConstant.USER_TASK, new UserTask(processorsMap));
+        globalTask.put(ProcessConstant.START, new StartTask(processorsMap));
+        globalTask.put(ProcessConstant.END, new EndTask(processorsMap));
         globalGateway.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap, conditionsMap));
         globalGateway.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap, conditionsMap));
         globalGateway.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap, conditionsMap));
@@ -97,16 +100,9 @@ public class ProcessEngine {
             throw new ProcessException("未找到任务类型: " + currentState.getType());
         }
         RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables);
-        task.execute(context);
-        Object result = getStateProcessResult(currentStateId, context);
+        Object result = task.execute(context);
         List<State> nextStatues = findNextStates(processDefinition, currentState, context);
         return new ProcessResult(processId, currentState, nextStatues, result);
-    }
-
-    private Object getStateProcessResult(String currentStateId, RuntimeContext context) {
-        return Optional.ofNullable(processorsMap.get(currentStateId))
-                .map(processor -> processor.process(context))
-                .orElse(null);
     }
 
     /**
@@ -155,8 +151,8 @@ public class ProcessEngine {
 
     private void handleEnd(ProcessDefinition processDefinition, State endState, RuntimeContext context, List<State> result) {
         ITask endTask = globalTask.get(endState.getType());
-        State nextState = endTask.execute(new RuntimeContext(processDefinition, endState, context.getVariables()));
-        result.add(nextState);
+        endTask.execute(new RuntimeContext(processDefinition, endState, context.getVariables()));
+        result.add(endState);
     }
 
     private void handleParallelEndGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {

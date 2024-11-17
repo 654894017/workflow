@@ -3,7 +3,6 @@ package com.damon.workflow.task;
 
 
 import com.damon.workflow.RuntimeContext;
-import com.damon.workflow.config.State;
 
 public interface ITask {
     /**
@@ -12,7 +11,7 @@ public interface ITask {
      * @param context
      * @return
      */
-    State execute(RuntimeContext context);
+    Object execute(RuntimeContext context);
 
     String getName();
 

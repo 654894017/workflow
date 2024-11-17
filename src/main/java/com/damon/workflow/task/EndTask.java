@@ -1,21 +1,17 @@
 package com.damon.workflow.task;
 
 
-import com.damon.workflow.RuntimeContext;
-import com.damon.workflow.config.ProcessDefinition;
-import com.damon.workflow.config.State;
+import com.damon.workflow.IProcessor;
+import com.damon.workflow.utils.CaseInsensitiveMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EndTask implements ITask {
+public class EndTask extends UserTask {
 
     private final Logger logger = LoggerFactory.getLogger(EndTask.class);
 
-    @Override
-    public State execute(RuntimeContext context) {
-        ProcessDefinition processDefinition = context.getProcessDefinition();
-        logger.info("processId: {}, end process, variables : {}", processDefinition.getId(), context.getVariables());
-        return context.getCurrentState();
+    public EndTask(CaseInsensitiveMap<IProcessor> processorsMap) {
+        super(processorsMap);
     }
 
     @Override
