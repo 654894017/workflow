@@ -159,8 +159,7 @@ public class ProcessEngine {
             } else {
                 if (currentState.getNextState() != null) {
                     State nextState = processDefinition.getState(currentState.getNextState());
-                    RuntimeContext nextStateContext = new RuntimeContext(processDefinition, nextState, context.getVariables());
-                    findNextStatesRecursive(processDefinition, nextState, nextStateContext, result, false);
+                    findNextStatesRecursive(processDefinition, context, nextState, result);
                 }
             }
         }
@@ -180,8 +179,7 @@ public class ProcessEngine {
             if (gatewayState == state) {
                 result.add(gatewayState);
             } else {
-                RuntimeContext nextContext = new RuntimeContext(processDefinition, state, context.getVariables());
-                findNextStatesRecursive(processDefinition, state, nextContext, result, false);
+                findNextStatesRecursive(processDefinition, context, state, result);
             }
         });
     }
@@ -191,8 +189,14 @@ public class ProcessEngine {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
         Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
         nextStates.forEach(state -> {
-            RuntimeContext nextContext = new RuntimeContext(processDefinition, state, context.getVariables());
-            findNextStatesRecursive(processDefinition, state, nextContext, result, false);
+            findNextStatesRecursive(processDefinition, context, state, result);
         });
     }
+
+    private void findNextStatesRecursive(ProcessDefinition processDefinition, RuntimeContext context, State state, List<State> result) {
+        RuntimeContext nextContext = new RuntimeContext(processDefinition, state, context.getVariables());
+        findNextStatesRecursive(processDefinition, state, nextContext, result, false);
+    }
+
+
 }
