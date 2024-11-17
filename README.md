@@ -27,6 +27,123 @@
 
 ### 使用demo
 ![复杂流程](images/WorkflowComplex.png)
+```YAML
+processDefinition:
+  id: "performanceReview"
+  startState: "Start"
+  states:
+    - id: "Start"
+      type: "UserTask"
+      nextState: "UserTask1"
+      assigneeRole: "Manager"
+      assigneeUser: "181987"
+      extendInformation:
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
+    - id: "UserTask1"
+      type: "UserTask"
+      nextState: "ReviewGateway"
+      assigneeRole: "Manager"
+      assigneeUser: "181987"
+      extendInformation:
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
 
+    - id: "ReviewGateway"
+      type: "ExclusiveGateway"
+      nextState: null
+      conditions:
+        - nextStateConditionParser: "com.damon.workflow.complex.parser.HighPerformanceReviewConditionParser"
+          nextState: "HighPerformanceReview"
+        - nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
+          nextState: "StandardReview"
+
+    - id: "HighPerformanceReview"
+      type: "UserTask"
+      assigneeRole: "Manager"
+      assigneeUser: "181989"
+      nextState: "UserTask2"
+      extendInformation:
+        allowEditingResouces:
+          - evaluation_info
+          - performance_level
+        actions:
+          - agree
+          - reject
+
+    - id: "StandardReview"
+      type: "UserTask"
+      assigneeRole: "Manager"
+      assigneeUser: "181990"
+      nextState: "UserTask2"
+      extendInformation:
+        allowEditingResouces:
+        actions:
+          - agree
+          - reject
+
+
+    - id: "UserTask2"
+      type: "UserTask"
+      nextState: "ParallelStartGateway"
+      assigneeRole: "Manager"
+      assigneeUser: "181987"
+      extendInformation:
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
+
+
+    - id: "ParallelStartGateway"
+      type: "ParallelStartGateway"
+      nextState: null
+      conditions:
+        - condition: "true"
+          nextState: "UserTask3"
+        - condition: "true"
+          nextState: "UserTask4"
+
+    - id: "UserTask3"
+      type: "UserTask"
+      nextState: "ParallelEndGateway"
+      assigneeRole: "Manager"
+      assigneeUser: "181987"
+      extendInformation:
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
+
+    - id: "UserTask4"
+      type: "UserTask"
+      nextState: "ParallelEndGateway"
+      assigneeRole: "Manager"
+      assigneeUser: "181987"
+      extendInformation:
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
+
+
+    - id: "ParallelEndGateway"
+      type: "ParallelEndGateway"
+      nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
+      nextState: "End"
+      extendInformation:
+        allowEditingResouces:
+        actions:
+          - agree
+          - reject
+
+    - id: "End"
+      type: "End"
+      nextState: null
+```
 https://github.com/654894017/workflow/tree/master/src/test/java/com/damon/workflow/complex
 
