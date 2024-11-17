@@ -7,6 +7,7 @@ import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.evaluator.JavaScriptEvaluator;
 import com.damon.workflow.exception.ProcessException;
+import com.damon.workflow.exception.ProcessTaskException;
 import com.damon.workflow.gateway.ExclusiveGateway;
 import com.damon.workflow.gateway.IGateway;
 import com.damon.workflow.gateway.ParallelEndGateway;
@@ -25,8 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class ProcessEngine {
-    private final CaseInsensitiveMap<ITask> globalTask = new CaseInsensitiveMap<>();
-    private final CaseInsensitiveMap<IGateway> globalGateway = new CaseInsensitiveMap<>();
+    private final CaseInsensitiveMap<ITask> taskMap = new CaseInsensitiveMap<>();
+    private final CaseInsensitiveMap<IGateway> gatewayMap = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IProcessor> processorsMap = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IConditionParser> conditionsMap = new CaseInsensitiveMap<>();
@@ -34,12 +35,12 @@ public class ProcessEngine {
     private final String processId;
 
     public ProcessEngine(String content) {
-        globalTask.put(ProcessConstant.USER_TASK, new UserTask(processorsMap));
-        globalTask.put(ProcessConstant.START, new StartTask(processorsMap));
-        globalTask.put(ProcessConstant.END, new EndTask(processorsMap));
-        globalGateway.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap, conditionsMap));
-        globalGateway.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap, conditionsMap));
-        globalGateway.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap, conditionsMap));
+        taskMap.put(ProcessConstant.USER_TASK, new UserTask(processorsMap));
+        taskMap.put(ProcessConstant.START, new StartTask(processorsMap));
+        taskMap.put(ProcessConstant.END, new EndTask(processorsMap));
+        gatewayMap.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap, conditionsMap));
+        gatewayMap.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap, conditionsMap));
+        gatewayMap.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap, conditionsMap));
         evaluatorMap.put(ProcessConstant.DEFAULT_EVALUATOR, new JavaScriptEvaluator());
         this.config = YamlUtils.load(content, ProcessConfig.class);
         this.processId = config.getProcessDefinition().getId();
@@ -96,12 +97,16 @@ public class ProcessEngine {
             throw new ProcessException("无效的流程状态ID: " + currentStateId);
         }
         String currentStateType = currentState.getType();
-        ITask task = globalTask.get(currentStateType);
+        ITask task = taskMap.get(currentStateType);
         if (task == null) {
             throw new ProcessException("未找到任务类型: " + currentState.getType());
         }
         RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables);
-        task.execute(context);
+        try {
+            task.execute(context);
+        } catch (Exception e) {
+            throw new ProcessTaskException("任务执行失败: " + currentState.getId(), e);
+        }
         List<State> nextStates = findNextStates(processDefinition, currentState, context);
         if (isCompleted(nextStates, currentState)) {
             return new ProcessResult(true, currentState, nextStates);
@@ -154,22 +159,22 @@ public class ProcessEngine {
             } else {
                 if (currentState.getNextState() != null) {
                     State nextState = processDefinition.getState(currentState.getNextState());
-                    RuntimeContext rc = new RuntimeContext(processDefinition, nextState, context.getVariables());
-                    findNextStatesRecursive(processDefinition, nextState, rc, result, false);
+                    RuntimeContext nextStateContext = new RuntimeContext(processDefinition, nextState, context.getVariables());
+                    findNextStatesRecursive(processDefinition, nextState, nextStateContext, result, false);
                 }
             }
         }
     }
 
     private void handleEnd(ProcessDefinition processDefinition, State endState, RuntimeContext context, List<State> result) {
-        ITask endTask = globalTask.get(endState.getType());
+        ITask endTask = taskMap.get(endState.getType());
         endTask.execute(new RuntimeContext(processDefinition, endState, context.getVariables()));
         result.add(endState);
     }
 
     private void handleParallelEndGateway(ProcessDefinition processDefinition, State gatewayState,
                                           RuntimeContext context, List<State> result) {
-        IGateway gateway = globalGateway.get(gatewayState.getType());
+        IGateway gateway = gatewayMap.get(gatewayState.getType());
         Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
         nextStates.forEach(state -> {
             if (gatewayState == state) {
@@ -183,7 +188,7 @@ public class ProcessEngine {
 
     private void handleGateway(ProcessDefinition processDefinition, State gatewayState,
                                RuntimeContext context, List<State> result) {
-        IGateway gateway = globalGateway.get(gatewayState.getType());
+        IGateway gateway = gatewayMap.get(gatewayState.getType());
         Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
         nextStates.forEach(state -> {
             RuntimeContext nextContext = new RuntimeContext(processDefinition, state, context.getVariables());
