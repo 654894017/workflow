@@ -16,6 +16,7 @@ import com.damon.workflow.task.ITask;
 import com.damon.workflow.task.StartTask;
 import com.damon.workflow.task.UserTask;
 import com.damon.workflow.utils.CaseInsensitiveMap;
+import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.YamlUtils;
 
 import java.util.ArrayList;
@@ -101,8 +102,18 @@ public class ProcessEngine {
         }
         RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables);
         Object result = task.execute(context);
-        List<State> nextStatues = findNextStates(processDefinition, currentState, context);
-        return new ProcessResult(processId, currentState, nextStatues, result);
+        List<State> nextStates = findNextStates(processDefinition, currentState, context);
+        if (isCompleted(nextStates, currentState)) {
+            return new ProcessResult(true, currentState, nextStates, result);
+        }
+        return new ProcessResult(currentState, nextStates, result);
+    }
+
+    public boolean isCompleted(List<State> nextStates, State currentState) {
+        if (CollUtils.isEmpty(nextStates)) {
+            throw new ProcessException("流程ID: " + processId + ", 任务ID: " + currentState.getId() + ", 异常结束,请确认流程设计是否正确");
+        }
+        return ProcessConstant.END.equals(nextStates.get(0).getType());
     }
 
     /**

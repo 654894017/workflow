@@ -77,6 +77,7 @@ public class WorkflowComplexConditionParserTest {
         HashMap params5 = new HashMap<>();
         params5.put("employeePerformance", 50);
         ProcessResult result6 = engine.process(state5.getId(), params5);
+        System.out.println("----------------");
         for (State state : result6.getNextStates()) {
             System.out.println(state.getId());
         }

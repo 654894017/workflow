@@ -23,10 +23,11 @@ public class UserTask implements ITask {
     public Object execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
         State currentState = context.getCurrentState();
+        Object result = getStateProcessResult(currentState.getId(), context);
         logger.info("processId: {}, {}: {} is finshed, next state id: {}, variables: {}",
                 processDefinition.getId(), getName(), currentState.getId(), currentState.getNextState(),
                 context.getVariables());
-        return getStateProcessResult(currentState.getId(), context);
+        return result;
     }
 
     @Override
