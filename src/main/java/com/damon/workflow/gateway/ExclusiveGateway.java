@@ -45,7 +45,8 @@ public class ExclusiveGateway implements IGateway {
                         processDefinition.getId(), getName(), gatewayState.getId(), result, condition.getNextStateConditionParser(),
                         context.getVariables());
             } else {
-                IEvaluator evaluator = evaluatorMap.get(condition.getScriptType());
+                String scriptType = StrUtils.isEmpty(condition.getScriptType()) ? "JavaScript" : condition.getScriptType();
+                IEvaluator evaluator = evaluatorMap.get(scriptType);
                 if (evaluator == null) {
                     throw new ProcessException("未找到脚本执行器: " + condition.getScriptType());
                 }

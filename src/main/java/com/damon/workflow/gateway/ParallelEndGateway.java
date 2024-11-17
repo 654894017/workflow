@@ -41,7 +41,9 @@ public class ParallelEndGateway implements IGateway {
             }
             result = conditionParser.test(context);
         } else {
-            IEvaluator evaluator = evaluatorMap.get(currentState.getNextStateConditionScriptType());
+            String nextStateConditionScriptType = currentState.getNextStateConditionScriptType();
+            String scriptType = StrUtils.isEmpty(nextStateConditionScriptType) ? "JavaScript" : nextStateConditionScriptType;
+            IEvaluator evaluator = evaluatorMap.get(scriptType);
             if (evaluator == null) {
                 throw new ProcessException("未找到脚本执行器: " + currentState.getNextStateConditionScriptType());
             }

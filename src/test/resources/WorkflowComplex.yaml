@@ -29,10 +29,8 @@ processDefinition:
       conditions:
         - condition: "a>85"
           nextState: "HighPerformanceReview"
-          scriptType: "JavaScript"
         - condition: "a<=85"
           nextState: "StandardReview"
-          scriptType: "JavaScript"
 
     - id: "HighPerformanceReview"
       type: "UserTask"
@@ -77,10 +75,8 @@ processDefinition:
       conditions:
         - condition: "true"
           nextState: "UserTask3"
-          scriptType: "JavaScript"
         - condition: "true"
           nextState: "UserTask4"
-          scriptType: "JavaScript"
 
     - id: "UserTask3"
       type: "UserTask"
@@ -108,7 +104,6 @@ processDefinition:
     - id: "ParallelEndGateway"
       type: "ParallelEndGateway"
       nextStateCondition: "test"
-      nextStateConditionScriptType: "JavaScript"
       nextState: "End"
       extendInformation:
         allowEditingResouces:

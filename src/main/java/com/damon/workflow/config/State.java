@@ -9,7 +9,6 @@ public class State {
     private String name;
     private String assigneeRole;
     private String assigneeUser;
-    private String requiredStatus;
     private ExtendInformation extendInformation;
     private List<Condition> conditions;
     private String nextState;
@@ -31,14 +30,6 @@ public class State {
 
     public void setAssigneeRole(String assigneeRole) {
         this.assigneeRole = assigneeRole;
-    }
-
-    public String getRequiredStatus() {
-        return requiredStatus;
-    }
-
-    public void setRequiredStatus(String requiredStatus) {
-        this.requiredStatus = requiredStatus;
     }
 
     public List<Condition> getConditions() {

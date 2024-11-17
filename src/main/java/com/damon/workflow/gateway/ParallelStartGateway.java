@@ -32,7 +32,6 @@ public class ParallelStartGateway implements IGateway {
         Set<State> nextStates = new HashSet<>();
         State state = context.getCurrentState();
         ProcessDefinition processDefinition = context.getProcessDefinition();
-        String processId = processDefinition.getId();
         for (Condition condition : state.getConditions()) {
             boolean result;
             if (StrUtils.isNotEmpty(condition.getNextStateConditionParser())) {
@@ -42,7 +41,8 @@ public class ParallelStartGateway implements IGateway {
                 }
                 result = conditionParser.test(context);
             } else {
-                IEvaluator evaluator = evaluatorMap.get(condition.getScriptType());
+                String scriptType = StrUtils.isEmpty(condition.getScriptType()) ? "JavaScript" : condition.getScriptType();
+                IEvaluator evaluator = evaluatorMap.get(scriptType);
                 if (evaluator == null) {
                     throw new ProcessException("未找到脚本执行器: " + condition.getScriptType());
                 }

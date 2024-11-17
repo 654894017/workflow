@@ -31,7 +31,6 @@ processDefinition:
           nextState: "HighPerformanceReview"
         - nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
           nextState: "StandardReview"
-          scriptType: "JavaScript"
 
     - id: "HighPerformanceReview"
       type: "UserTask"
@@ -76,10 +75,8 @@ processDefinition:
       conditions:
         - condition: "true"
           nextState: "UserTask3"
-          scriptType: "JavaScript"
         - condition: "true"
           nextState: "UserTask4"
-          scriptType: "JavaScript"
 
     - id: "UserTask3"
       type: "UserTask"
