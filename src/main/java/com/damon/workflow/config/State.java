@@ -6,6 +6,7 @@ import java.util.Objects;
 public class State {
     private String id;
     private String type;
+    private String name;
     private String assigneeRole;
     private String assigneeUser;
     private String requiredStatus;
@@ -102,6 +103,14 @@ public class State {
 
     public void setNextStateConditionParser(String nextStateConditionParser) {
         this.nextStateConditionParser = nextStateConditionParser;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
