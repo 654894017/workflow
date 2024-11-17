@@ -1,6 +1,7 @@
 package com.damon.workflow.gateway;
 
 import com.damon.workflow.IConditionParser;
+import com.damon.workflow.ProcessConstant;
 import com.damon.workflow.RuntimeContext;
 import com.damon.workflow.config.Condition;
 import com.damon.workflow.config.ProcessDefinition;
@@ -45,7 +46,7 @@ public class ExclusiveGateway implements IGateway {
                         processDefinition.getId(), getName(), gatewayState.getId(), result, condition.getNextStateConditionParser(),
                         context.getVariables());
             } else {
-                String scriptType = StrUtils.isEmpty(condition.getScriptType()) ? "JavaScript" : condition.getScriptType();
+                String scriptType = StrUtils.isEmpty(condition.getScriptType()) ? ProcessConstant.DEFAULT_EVALUATOR : condition.getScriptType();
                 IEvaluator evaluator = evaluatorMap.get(scriptType);
                 if (evaluator == null) {
                     throw new ProcessException("未找到脚本执行器: " + condition.getScriptType());

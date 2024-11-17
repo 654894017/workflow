@@ -16,9 +16,7 @@ public class GroovyEvaluator implements IEvaluator {
     @Override
     public boolean evaluate(String expression, RuntimeContext context) {
         Bindings bindings = engine.createBindings();
-        context.getVariables().forEach((field, value) -> {
-            bindings.put(field, value);
-        });
+        context.getVariables().forEach(bindings::put);
         try {
             return (Boolean) engine.eval(expression, bindings);
         } catch (ScriptException e) {

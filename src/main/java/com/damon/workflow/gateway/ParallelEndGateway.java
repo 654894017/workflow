@@ -1,6 +1,7 @@
 package com.damon.workflow.gateway;
 
 import com.damon.workflow.IConditionParser;
+import com.damon.workflow.ProcessConstant;
 import com.damon.workflow.RuntimeContext;
 import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
@@ -42,7 +43,7 @@ public class ParallelEndGateway implements IGateway {
             result = conditionParser.test(context);
         } else {
             String nextStateConditionScriptType = currentState.getNextStateConditionScriptType();
-            String scriptType = StrUtils.isEmpty(nextStateConditionScriptType) ? "JavaScript" : nextStateConditionScriptType;
+            String scriptType = StrUtils.isEmpty(nextStateConditionScriptType) ? ProcessConstant.DEFAULT_EVALUATOR : nextStateConditionScriptType;
             IEvaluator evaluator = evaluatorMap.get(scriptType);
             if (evaluator == null) {
                 throw new ProcessException("未找到脚本执行器: " + currentState.getNextStateConditionScriptType());
