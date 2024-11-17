@@ -113,7 +113,8 @@ public class ProcessEngine {
      * @param context           执行上下文，包括条件变量等
      * @return 后续所有待执行的节点集合
      */
-    public List<State> findNextStates(ProcessDefinition processDefinition, State currentState, RuntimeContext context) {
+    public List<State> findNextStates(ProcessDefinition processDefinition,
+                                      State currentState, RuntimeContext context) {
         List<State> nextStates = new ArrayList<>();
         findNextStatesRecursive(processDefinition, currentState, context, nextStates, true);
         return nextStates;
@@ -155,7 +156,8 @@ public class ProcessEngine {
         result.add(endState);
     }
 
-    private void handleParallelEndGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
+    private void handleParallelEndGateway(ProcessDefinition processDefinition, State gatewayState,
+                                          RuntimeContext context, List<State> result) {
         IGateway gateway = globalGateway.get(gatewayState.getType());
         Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
         nextStates.forEach(state -> {
@@ -168,7 +170,8 @@ public class ProcessEngine {
         });
     }
 
-    private void handleGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
+    private void handleGateway(ProcessDefinition processDefinition, State gatewayState,
+                               RuntimeContext context, List<State> result) {
         IGateway gateway = globalGateway.get(gatewayState.getType());
         Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
         nextStates.forEach(state -> {
