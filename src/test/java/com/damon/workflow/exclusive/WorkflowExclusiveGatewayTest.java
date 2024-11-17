@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class WorkflowExclusiveGatewayTest {
-    private final static String PROCESS_ID = "performanceReview";
-
     @Test
     public void test() {
         ProcessEngine engine = new ProcessEngine(ClasspathFileUtils.readFileAsString("WorkflowExclusiveGateway.yaml"));
@@ -30,11 +28,9 @@ public class WorkflowExclusiveGatewayTest {
         params.put("employeePerformance", 85);
 
         ProcessResult result = engine.process(params);
-        System.out.println((Object) result.getResult());
         while (result != null) {
             if (!result.isCompleted()) {
                 result = engine.process(result.getNextStates().get(0).getId(), params);
-                System.out.println((Object) result.getResult());
             } else {
                 break;
             }

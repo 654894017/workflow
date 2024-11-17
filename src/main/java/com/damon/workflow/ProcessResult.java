@@ -9,20 +9,17 @@ public class ProcessResult {
     private boolean completed;
     private State currentState;
     private List<State> nextStates;
-    private Object result;
 
-    public ProcessResult(boolean completed, State currentState, List<State> nextStates, Object result) {
+    public ProcessResult(boolean completed, State currentState, List<State> nextStates) {
         this.completed = completed;
         this.nextStates = nextStates;
         this.currentState = currentState;
-        this.result = result;
     }
 
 
-    public ProcessResult(State currentState, List<State> nextStates, Object result) {
+    public ProcessResult(State currentState, List<State> nextStates) {
         this.nextStates = nextStates;
         this.currentState = currentState;
-        this.result = result;
     }
 
     public boolean isCompleted() {
@@ -35,9 +32,5 @@ public class ProcessResult {
 
     public List<State> getNextStates() {
         return nextStates;
-    }
-
-    public <T> T getResult() {
-        return (T) result;
     }
 }

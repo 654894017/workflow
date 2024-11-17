@@ -2,20 +2,14 @@ package com.damon.workflow.complex.processor;
 
 import com.damon.workflow.IProcessor;
 import com.damon.workflow.RuntimeContext;
-import com.damon.workflow.config.State;
 import com.damon.workflow.utils.Sets;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
-public class UserTask3Processor implements IProcessor<Map<String, Object>> {
+public class UserTask3Processor implements IProcessor {
     @Override
-    public Map<String, Object> process(RuntimeContext context) {
-        HashMap<String, Object> map = new HashMap<>();
-        State state = context.getCurrentState();
-        map.put(state.getId(), state.getType());
-        return map;
+    public void process(RuntimeContext context) {
+        System.out.println(context.getCurrentState().getId() + ":" + context.getVariables());
     }
 
     @Override

@@ -2,8 +2,8 @@ package com.damon.workflow;
 
 import java.util.Set;
 
-public interface IProcessor<R> {
-    R process(RuntimeContext context);
+public interface IProcessor {
+    void process(RuntimeContext context);
 
     Set<String> stateIds();
 }

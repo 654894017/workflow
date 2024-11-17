@@ -11,7 +11,7 @@ public interface ITask {
      * @param context
      * @return
      */
-    Object execute(RuntimeContext context);
+    void execute(RuntimeContext context);
 
     String getName();
 

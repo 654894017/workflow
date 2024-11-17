@@ -55,7 +55,7 @@ public class ProcessEngine {
     }
 
     public void registerProcessors(IProcessor... processors) {
-        for (IProcessor<?> processor : processors) {
+        for (IProcessor processor : processors) {
             processor.stateIds().forEach(stateId -> {
                 if (processorsMap.containsKey(stateId)) {
                     throw new ProcessException("Processor stateId 重复定义，请检查配置文件，stateId: " + stateId);
@@ -101,12 +101,12 @@ public class ProcessEngine {
             throw new ProcessException("未找到任务类型: " + currentState.getType());
         }
         RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables);
-        Object result = task.execute(context);
+        task.execute(context);
         List<State> nextStates = findNextStates(processDefinition, currentState, context);
         if (isCompleted(nextStates, currentState)) {
-            return new ProcessResult(true, currentState, nextStates, result);
+            return new ProcessResult(true, currentState, nextStates);
         }
-        return new ProcessResult(currentState, nextStates, result);
+        return new ProcessResult(currentState, nextStates);
     }
 
     public boolean isCompleted(List<State> nextStates, State currentState) {
