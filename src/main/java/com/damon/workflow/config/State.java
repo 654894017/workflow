@@ -1,15 +1,14 @@
 package com.damon.workflow.config;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class State {
     private String id;
     private String type;
     private String name;
-    private String assigneeRole;
-    private String assigneeUser;
-    private ExtendInformation extendInformation;
+    private Map<String,Object> extendParams;
     private List<Condition> conditions;
     private String nextState;
     private String nextStateCondition;
@@ -22,14 +21,6 @@ public class State {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getAssigneeRole() {
-        return assigneeRole;
-    }
-
-    public void setAssigneeRole(String assigneeRole) {
-        this.assigneeRole = assigneeRole;
     }
 
     public List<Condition> getConditions() {
@@ -48,20 +39,12 @@ public class State {
         this.nextState = nextState;
     }
 
-    public String getAssigneeUser() {
-        return assigneeUser;
+    public Map<String, Object> getExtendParams() {
+        return extendParams;
     }
 
-    public void setAssigneeUser(String assigneeUser) {
-        this.assigneeUser = assigneeUser;
-    }
-
-    public ExtendInformation getExtendInformation() {
-        return extendInformation;
-    }
-
-    public void setExtendInformation(ExtendInformation extendInformation) {
-        this.extendInformation = extendInformation;
+    public void setExtendParams(Map<String, Object> extendParams) {
+        this.extendParams = extendParams;
     }
 
     public String getType() {

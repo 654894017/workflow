@@ -5,9 +5,9 @@ processDefinition:
     - id: "Start"
       type: "Start"
       nextState: "ReviewGateway"
-      assigneeRole: "Manager"
-      assigneeUser: "181987"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
         allowEditingResouces:
           - review_base_info
         actions:
@@ -23,10 +23,10 @@ processDefinition:
 
     - id: "HighPerformanceReview"
       type: "UserTask"
-      assigneeRole: "Manager"
-      assigneeUser: "181989"
       nextState: "End"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181989"
         allowEditingResouces:
           - evaluation_info
           - performance_level
@@ -36,10 +36,10 @@ processDefinition:
 
     - id: "StandardReview"
       type: "UserTask"
-      assigneeRole: "Manager"
-      assigneeUser: "181990"
       nextState: "End"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181989"
         allowEditingResouces:
         actions:
           - agree

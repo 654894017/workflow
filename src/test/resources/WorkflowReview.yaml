@@ -5,9 +5,9 @@ processDefinition:
     - id: "Start"
       type: "UserTask"
       nextState: "ReviewGateway"
-      assigneeRole: "Manager"
-      assigneeUser: "181987"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
         allowEditingResouces:
           - review_base_info
         actions:
@@ -37,9 +37,9 @@ processDefinition:
     - id: "UserTask3"
       type: "UserTask"
       nextState: "End"
-      assigneeRole: "Manager"
-      assigneeUser: "181987"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
         allowEditingResouces:
           - review_base_info
         actions:
@@ -48,9 +48,9 @@ processDefinition:
     - id: "UserTask4"
       type: "UserTask"
       nextState: "End"
-      assigneeRole: "Manager"
-      assigneeUser: "181987"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
         allowEditingResouces:
           - review_base_info
         actions:

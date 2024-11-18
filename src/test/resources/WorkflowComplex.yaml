@@ -5,9 +5,9 @@ processDefinition:
     - id: "Start"
       type: "UserTask"
       nextState: "UserTask1"
-      assigneeRole: "Manager"
-      assigneeUser: "181987"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
         allowEditingResouces:
           - review_base_info
         actions:
@@ -15,9 +15,9 @@ processDefinition:
     - id: "UserTask1"
       type: "UserTask"
       nextState: "ReviewGateway"
-      assigneeRole: "Manager"
-      assigneeUser: "181987"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
         allowEditingResouces:
           - review_base_info
         actions:
@@ -33,10 +33,10 @@ processDefinition:
 
     - id: "HighPerformanceReview"
       type: "UserTask"
-      assigneeRole: "Manager"
-      assigneeUser: "181989"
       nextState: "UserTask2"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181989"
         allowEditingResouces:
           - evaluation_info
           - performance_level
@@ -46,10 +46,10 @@ processDefinition:
 
     - id: "StandardReview"
       type: "UserTask"
-      assigneeRole: "Manager"
-      assigneeUser: "181990"
       nextState: "UserTask2"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181990"
         allowEditingResouces:
         actions:
           - agree
@@ -58,9 +58,9 @@ processDefinition:
     - id: "UserTask2"
       type: "UserTask"
       nextState: "ParallelStartGateway"
-      assigneeRole: "Manager"
-      assigneeUser: "181987"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
         allowEditingResouces:
           - review_base_info
         actions:
@@ -78,9 +78,9 @@ processDefinition:
     - id: "UserTask3"
       type: "UserTask"
       nextState: "ParallelEndGateway"
-      assigneeRole: "Manager"
-      assigneeUser: "181987"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
         allowEditingResouces:
           - review_base_info
         actions:
@@ -89,9 +89,9 @@ processDefinition:
     - id: "UserTask4"
       type: "UserTask"
       nextState: "ParallelEndGateway"
-      assigneeRole: "Manager"
-      assigneeUser: "181987"
-      extendInformation:
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
         allowEditingResouces:
           - review_base_info
         actions:
@@ -101,7 +101,7 @@ processDefinition:
       type: "ParallelEndGateway"
       nextStateCondition: "test"
       nextState: "End"
-      extendInformation:
+      extendParams:
         allowEditingResouces:
         actions:
           - agree
