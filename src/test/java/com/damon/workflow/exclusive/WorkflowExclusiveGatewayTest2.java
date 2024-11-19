@@ -12,10 +12,10 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WorkflowExclusiveGatewayTest {
+public class WorkflowExclusiveGatewayTest2 {
     @Test
     public void test() {
-        ProcessInstance engine = ProcessInstance.loadYaml("WorkflowExclusiveGateway.yaml");
+        ProcessInstance engine = ProcessInstance.loadYaml("WorkflowExclusiveGateway2.yaml");
         engine.registerProcessors(
                 new StartProcessor(),
                 new HighPerformanceReviewProcessor(),
@@ -24,11 +24,12 @@ public class WorkflowExclusiveGatewayTest {
         engine.registerConditionParsers(new HighPerformanceReviewConditionParser());
         engine.registerConditionParsers(new StandardReviewConditionParser());
         Map<String, Object> params = new HashMap<>();
-        params.put("employeePerformance", 85);
+        params.put("employeePerformance", 50);
 
         ProcessResult result = engine.process(params);
         while (result != null) {
             if (!result.isCompleted()) {
+                System.out.println(result.getNextStates().get(0).getId());
                 result = engine.process(result.getNextStates().get(0).getId(), params);
             } else {
                 break;

@@ -1,9 +1,8 @@
 package com.damon.workflow.complex;
 
-import com.damon.workflow.ProcessEngine;
+import com.damon.workflow.ProcessInstance;
 import com.damon.workflow.ProcessResult;
 import com.damon.workflow.config.State;
-import com.damon.workflow.utils.ClasspathFileUtils;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.Map;
 public class WorkflowComplexTest {
     @Test
     public void test() {
-        ProcessEngine engine = new ProcessEngine(ClasspathFileUtils.readFileAsString("WorkflowComplex.yaml"));
+        ProcessInstance engine = ProcessInstance.loadYaml("WorkflowComplex.yaml");
 
         ProcessResult result = engine.process(new HashMap<>());
         System.out.println("----------------");

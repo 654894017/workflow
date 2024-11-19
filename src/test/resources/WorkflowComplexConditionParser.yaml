@@ -1,5 +1,6 @@
 processDefinition:
   id: "performanceReview"
+  version: "1.0"
   startState: "Start"
   states:
     - id: "Start"
@@ -25,7 +26,6 @@ processDefinition:
 
     - id: "ReviewGateway"
       type: "ExclusiveGateway"
-      nextState: null
       conditions:
         - nextStateConditionParser: "com.damon.workflow.complex.parser.HighPerformanceReviewConditionParser"
           nextState: "HighPerformanceReview"
@@ -92,24 +92,11 @@ processDefinition:
     - id: "UserTask4"
       type: "UserTask"
       nextState: "ParallelEndGateway"
-      extendParams:
-        assigneeRole: "Manager"
-        assigneeUser: "181987"
-        allowEditingResouces:
-          - review_base_info
-        actions:
-          - submit
-
 
     - id: "ParallelEndGateway"
       type: "ParallelEndGateway"
       nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
       nextState: "End"
-      extendParams:
-        allowEditingResouces:
-        actions:
-          - agree
-          - reject
 
     - id: "End"
       type: "End"

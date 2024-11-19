@@ -1,7 +1,6 @@
 package com.damon.workflow;
 
 import com.damon.workflow.config.State;
-import com.damon.workflow.utils.ClasspathFileUtils;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -11,7 +10,7 @@ import java.util.Map;
 public class WorkflowReviewTest {
     @Test
     public void test() {
-        ProcessEngine engine = new ProcessEngine(ClasspathFileUtils.readFileAsString("WorkflowReview.yaml"));
+        ProcessInstance engine = ProcessInstance.loadYaml("WorkflowReview.yaml");
         HashMap params1 = new HashMap<>();
         params1.put("a", 20);
         ProcessResult result = engine.process(params1);

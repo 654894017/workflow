@@ -43,7 +43,7 @@ public class ExclusiveGateway implements IGateway {
                 }
                 result = conditionParser.test(context);
                 logger.info("processId: {}, {}: {}, result: {}, conditionType: {}, variables: {}",
-                        processDefinition.getId(), getName(), gatewayState.getId(), result, condition.getNextStateConditionParser(),
+                        processDefinition.getIdentifier(), getName(), gatewayState.getId(), result, condition.getNextStateConditionParser(),
                         context.getVariables());
             } else {
                 String scriptType = StrUtils.isEmpty(condition.getScriptType()) ? ProcessConstant.DEFAULT_EVALUATOR : condition.getScriptType();
@@ -53,7 +53,7 @@ public class ExclusiveGateway implements IGateway {
                 }
                 result = evaluator.evaluate(condition.getCondition(), context);
                 logger.info("processId: {}, {}: {}, result: {}, condition: {}, variables: {}",
-                        processDefinition.getId(), getName(), gatewayState.getId(), result, condition.getCondition(),
+                        processDefinition.getIdentifier(), getName(), gatewayState.getId(), result, condition.getCondition(),
                         context.getVariables());
             }
             if (result) {

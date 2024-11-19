@@ -1,15 +1,13 @@
 package com.damon.workflow;
 
+import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 
-public abstract class SafeConditionParser implements IConditionParser {
+@RequiredArgsConstructor
+public abstract class RedissionSafeConditionParser implements IConditionParser {
 
     private final RedissonClient redissonClient;
-
-    protected SafeConditionParser(RedissonClient redissonClient) {
-        this.redissonClient = redissonClient;
-    }
 
     @Override
     public boolean test(RuntimeContext context) {
@@ -23,9 +21,9 @@ public abstract class SafeConditionParser implements IConditionParser {
     }
 
     private String createLockIdentifier(RuntimeContext context) {
-        String processId = context.getProcessDefinition().getId();
+        String processIdentifier = context.getProcessDefinition().getIdentifier();
         String currentStateId = context.getCurrentState().getId();
-        return "workflow_lock_" + processId + "_" + currentStateId;
+        return "workflow_lock_" + processIdentifier + "_" + currentStateId;
     }
 
 

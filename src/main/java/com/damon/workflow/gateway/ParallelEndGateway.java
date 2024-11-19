@@ -31,7 +31,6 @@ public class ParallelEndGateway implements IGateway {
     @Override
     public Set<State> execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
-        String processId = processDefinition.getId();
         State currentState = context.getCurrentState();
         Set<State> nextStates = new HashSet<>();
         boolean result;
@@ -58,9 +57,7 @@ public class ParallelEndGateway implements IGateway {
         }
         nextStates.forEach(nextState -> {
             logger.info("processId: {}, {}: {}, nextState:{}, result: {}, variables: {}",
-                    processDefinition.getId(), getName(), currentState.getId(), nextState.getId(),
-                    result,
-                    context.getVariables()
+                    processDefinition.getIdentifier(), getName(), currentState.getId(), nextState.getId(), result, context.getVariables()
             );
         });
         return nextStates;
