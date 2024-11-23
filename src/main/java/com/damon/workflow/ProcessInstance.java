@@ -82,10 +82,21 @@ public class ProcessInstance {
      * 开启流程
      *
      * @param variables
+     * @param businessId
+     * @return
+     */
+    public ProcessResult process(Map<String, Object> variables, String businessId) {
+        return process(processDefinition.getStartState(), variables, businessId);
+    }
+
+    /**
+     * 开启流程
+     *
+     * @param variables
      * @return
      */
     public ProcessResult process(Map<String, Object> variables) {
-        return process(processDefinition.getStartState(), variables);
+        return process(variables, null);
     }
 
     /**
@@ -96,6 +107,18 @@ public class ProcessInstance {
      * @return
      */
     public ProcessResult process(String currentStateId, Map<String, Object> variables) {
+        return process(currentStateId, variables, null);
+    }
+
+    /**
+     * 流程处理
+     *
+     * @param currentStateId
+     * @param variables
+     * @param businessId
+     * @return
+     */
+    public ProcessResult process(String currentStateId, Map<String, Object> variables, String businessId) {
         // 验证流程配置
         if (processDefinition == null) {
             throw new ProcessException("流程ID: " + processDefinition.getIdentifier() + ", 未配置流程信息");
@@ -114,7 +137,7 @@ public class ProcessInstance {
         }
 
         // 执行任务
-        RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables);
+        RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables, businessId);
         Set<State> taskNextStates = task.execute(context);
 
         // 后续节点处理
@@ -194,7 +217,7 @@ public class ProcessInstance {
 
     private void handleParallelEndGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
-        Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
+        Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables(), context.getBusinessId()));
         nextStates.forEach(state -> {
             if (gatewayState == state) {
                 result.add(gatewayState);
@@ -206,7 +229,7 @@ public class ProcessInstance {
 
     private void handleGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
-        Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables()));
+        Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables(), context.getBusinessId()));
         nextStates.forEach(state -> {
             findNextStatesRecursive(processDefinition, state, context, result);
         });

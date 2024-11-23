@@ -14,4 +14,5 @@ public class RuntimeContext {
     private final ProcessDefinition processDefinition;
     private final State currentState;
     private final Map<String, Object> variables;
+    private final String businessId;
 }

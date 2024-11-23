@@ -21,11 +21,19 @@ public class ProcessEngine {
     }
 
     public ProcessResult process(String identifier, Map<String, Object> variables) {
+        return process(identifier, variables, null);
+    }
+
+    public ProcessResult process(String identifier, Map<String, Object> variables, String businessId) {
         ProcessInstance instance = instanceMap.get(identifier);
         return instance.process(variables);
     }
 
     public ProcessResult process(String identifier, String currentStateId, Map<String, Object> variables) {
+        return process(identifier, currentStateId, variables, null);
+    }
+
+    public ProcessResult process(String identifier, String currentStateId, Map<String, Object> variables, String businessId) {
         ProcessInstance instance = instanceMap.get(identifier);
         return instance.process(currentStateId, variables);
     }

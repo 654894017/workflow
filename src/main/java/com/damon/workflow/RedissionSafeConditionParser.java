@@ -1,10 +1,14 @@
 package com.damon.workflow;
 
+import com.damon.workflow.exception.ProcessException;
+import com.damon.workflow.utils.StrUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 
 @RequiredArgsConstructor
+@Slf4j
 public abstract class RedissionSafeConditionParser implements IConditionParser {
 
     private final RedissonClient redissonClient;
@@ -23,7 +27,17 @@ public abstract class RedissionSafeConditionParser implements IConditionParser {
     private String createLockIdentifier(RuntimeContext context) {
         String processIdentifier = context.getProcessDefinition().getIdentifier();
         String currentStateId = context.getCurrentState().getId();
-        return "workflow_lock_" + processIdentifier + "_" + currentStateId;
+        StringBuilder lockIdentifier = new StringBuilder("workflow_lock:");
+        lockIdentifier.append(processIdentifier).append(":").append(currentStateId);
+        if (StrUtils.isEmpty(context.getBusinessId())) {
+            String errorMessage = String.format(
+                    "Process ID: %s, Current State: %s, the RedissionSafeConditionParser requires an associated Business ID to be provided.",
+                    processIdentifier, currentStateId
+            );
+            throw new ProcessException(errorMessage);
+        }
+        lockIdentifier.append(":").append(context.getBusinessId());
+        return lockIdentifier.toString();
     }
 
 
