@@ -5,7 +5,7 @@ processDefinition:
   states:
     - id: "Start"
       type: "Start"
-      nextState: "ReviewGateway"
+      nextStateId: "ReviewGateway"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -18,13 +18,13 @@ processDefinition:
       type: "ExclusiveGateway"
       conditions:
         - nextStateConditionParser: "com.damon.workflow.exclusive.parser.HighPerformanceReviewConditionParser"
-          nextState: "HighPerformanceReview"
+          nextStateId: "HighPerformanceReview"
         - nextStateConditionParser: "com.damon.workflow.exclusive.parser.StandardReviewConditionParser"
-          nextState: "StandardReview"
+          nextStateId: "StandardReview"
 
     - id: "HighPerformanceReview"
       type: "UserTask"
-      nextState: "End"
+      nextStateId: "End"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181989"
@@ -37,7 +37,7 @@ processDefinition:
 
     - id: "StandardReview"
       type: "UserTask"
-      nextState: "End"
+      nextStateId: "End"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181989"
@@ -47,4 +47,4 @@ processDefinition:
           - reject
     - id: "End"
       type: "End"
-      nextState: null
+      nextStateId: null

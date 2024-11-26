@@ -1,6 +1,6 @@
 package com.damon.workflow.gateway;
 
-import com.damon.workflow.IConditionParser;
+import com.damon.workflow.condition_parser.IConditionParser;
 import com.damon.workflow.ProcessConstant;
 import com.damon.workflow.RuntimeContext;
 import com.damon.workflow.config.ProcessDefinition;
@@ -9,6 +9,7 @@ import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.StrUtils;
+import com.damon.workflow.utils.spring.ApplicationContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +22,8 @@ public class ParallelEndGateway implements IGateway {
 
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
 
-    private final CaseInsensitiveMap<IConditionParser> conditionMap;
-
-    public ParallelEndGateway(CaseInsensitiveMap<IEvaluator> evaluatorMap, CaseInsensitiveMap<IConditionParser> conditionMap) {
+    public ParallelEndGateway(CaseInsensitiveMap<IEvaluator> evaluatorMap) {
         this.evaluatorMap = evaluatorMap;
-        this.conditionMap = conditionMap;
     }
 
     @Override
@@ -35,7 +33,7 @@ public class ParallelEndGateway implements IGateway {
         Set<State> nextStates = new HashSet<>();
         boolean result;
         if (StrUtils.isNotEmpty(currentState.getNextStateConditionParser())) {
-            IConditionParser conditionParser = conditionMap.get(currentState.getNextStateConditionParser());
+            IConditionParser conditionParser = ApplicationContextHelper.getBean(currentState.getNextStateConditionParser());
             if (conditionParser == null) {
                 throw new ProcessException("未找到条件解析器: " + currentState.getNextStateConditionParser());
             }
@@ -50,7 +48,7 @@ public class ParallelEndGateway implements IGateway {
             result = evaluator.evaluate(currentState.getNextStateCondition(), context);
         }
         if (result) {
-            State nextState = processDefinition.getState(currentState.getNextState());
+            State nextState = processDefinition.getState(currentState.getNextStateId());
             nextStates.add(nextState);
         } else {
             nextStates.add(currentState);

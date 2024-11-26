@@ -8,6 +8,6 @@ import lombok.Setter;
 public class Condition {
     private String nextStateConditionParser;
     private String condition;
-    private String nextState;
+    private String nextStateId;
     private String scriptType;
 }

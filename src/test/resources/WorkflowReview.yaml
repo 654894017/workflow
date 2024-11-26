@@ -5,7 +5,7 @@ processDefinition:
   states:
     - id: "Start"
       type: "UserTask"
-      nextState: "ReviewGateway"
+      nextStateId: "ReviewGateway"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -15,29 +15,28 @@ processDefinition:
           - submit
     - id: "ReviewGateway"
       type: "ExclusiveGateway"
-      nextState: null
       conditions:
         - condition: "a>85"
-          nextState: "UserTask3"
+          nextStateId: "UserTask3"
           scriptType: "JavaScript"
         - condition: "a<=85"
-          nextState: "ReviewGateway2"
+          nextStateId: "ReviewGateway2"
           scriptType: "JavaScript"
     - id: "ReviewGateway2"
       type: "ExclusiveGateway"
-      nextState: null
+      nextStateId: null
       conditions:
         - condition: "a<85"
-          nextState: "UserTask4"
+          nextStateId: "UserTask4"
           scriptType: "JavaScript"
         - condition: "a>85"
-          nextState: "End"
+          nextStateId: "End"
           scriptType: "JavaScript"
 
 
     - id: "UserTask3"
       type: "UserTask"
-      nextState: "End"
+      nextStateId: "End"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -48,7 +47,7 @@ processDefinition:
 
     - id: "UserTask4"
       type: "UserTask"
-      nextState: "End"
+      nextStateId: "End"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -58,4 +57,4 @@ processDefinition:
           - submit
     - id: "End"
       type: "End"
-      nextState: null
+      nextStateId: null

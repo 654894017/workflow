@@ -1,19 +1,15 @@
 package com.damon.workflow.complex.processor;
 
-import com.damon.workflow.IProcessor;
+import com.damon.workflow.condition_parser.IProcessor;
 import com.damon.workflow.RuntimeContext;
-import com.damon.workflow.utils.Sets;
+import org.springframework.stereotype.Component;
 
-import java.util.Set;
-
+@Component
 public class UserTask3Processor implements IProcessor {
     @Override
     public void process(RuntimeContext context) {
         System.out.println(context.getCurrentState().getId() + ":" + context.getVariables());
     }
 
-    @Override
-    public Set<String> stateIds() {
-        return Sets.newHashSet("UserTask3");
-    }
+
 }

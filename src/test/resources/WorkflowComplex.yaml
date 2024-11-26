@@ -5,7 +5,7 @@ processDefinition:
   states:
     - id: "Start"
       type: "UserTask"
-      nextState: "UserTask1"
+      nextStateId: "UserTask1"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -15,7 +15,7 @@ processDefinition:
           - submit
     - id: "UserTask1"
       type: "UserTask"
-      nextState: "ReviewGateway"
+      nextStateId: "ReviewGateway"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -28,13 +28,13 @@ processDefinition:
       type: "ExclusiveGateway"
       conditions:
         - condition: "a>85"
-          nextState: "HighPerformanceReview"
+          nextStateId: "HighPerformanceReview"
         - condition: "a<=85"
-          nextState: "StandardReview"
+          nextStateId: "StandardReview"
 
     - id: "HighPerformanceReview"
       type: "UserTask"
-      nextState: "UserTask2"
+      nextStateId: "UserTask2"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181989"
@@ -47,7 +47,7 @@ processDefinition:
 
     - id: "StandardReview"
       type: "UserTask"
-      nextState: "UserTask2"
+      nextStateId: "UserTask2"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181990"
@@ -58,7 +58,7 @@ processDefinition:
 
     - id: "UserTask2"
       type: "UserTask"
-      nextState: "ParallelStartGateway"
+      nextStateId: "ParallelStartGateway"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -69,16 +69,16 @@ processDefinition:
 
     - id: "ParallelStartGateway"
       type: "ParallelStartGateway"
-      nextState: null
+      nextStateId: null
       conditions:
         - condition: "true"
-          nextState: "UserTask3"
+          nextStateId: "UserTask3"
         - condition: "true"
-          nextState: "UserTask4"
+          nextStateId: "UserTask4"
 
     - id: "UserTask3"
       type: "UserTask"
-      nextState: "ParallelEndGateway"
+      nextStateId: "ParallelEndGateway"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -89,7 +89,7 @@ processDefinition:
 
     - id: "UserTask4"
       type: "UserTask"
-      nextState: "ParallelEndGateway"
+      nextStateId: "ParallelEndGateway"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -101,8 +101,8 @@ processDefinition:
     - id: "ParallelEndGateway"
       type: "ParallelEndGateway"
       nextStateCondition: "test"
-      nextState: "End"
+      nextStateId: "End"
 
     - id: "End"
       type: "End"
-      nextState: null
+      nextStateId: null

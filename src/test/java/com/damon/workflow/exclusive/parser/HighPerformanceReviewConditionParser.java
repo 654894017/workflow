@@ -1,10 +1,12 @@
 package com.damon.workflow.exclusive.parser;
 
-import com.damon.workflow.IConditionParser;
+import com.damon.workflow.condition_parser.IConditionParser;
 import com.damon.workflow.RuntimeContext;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class HighPerformanceReviewConditionParser implements IConditionParser {
     @Override
     public boolean test(RuntimeContext context) {

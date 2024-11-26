@@ -1,6 +1,6 @@
 package com.damon.workflow.gateway;
 
-import com.damon.workflow.IConditionParser;
+import com.damon.workflow.condition_parser.IConditionParser;
 import com.damon.workflow.ProcessConstant;
 import com.damon.workflow.RuntimeContext;
 import com.damon.workflow.config.Condition;
@@ -10,6 +10,7 @@ import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.StrUtils;
+import com.damon.workflow.utils.spring.ApplicationContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +22,8 @@ public class ParallelStartGateway implements IGateway {
 
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
 
-    private final CaseInsensitiveMap<IConditionParser> conditionMap;
-
-    public ParallelStartGateway(CaseInsensitiveMap<IEvaluator> evaluatorMap, CaseInsensitiveMap<IConditionParser> conditionMap) {
+    public ParallelStartGateway(CaseInsensitiveMap<IEvaluator> evaluatorMap) {
         this.evaluatorMap = evaluatorMap;
-        this.conditionMap = conditionMap;
     }
 
     @Override
@@ -36,7 +34,7 @@ public class ParallelStartGateway implements IGateway {
         for (Condition condition : state.getConditions()) {
             boolean result;
             if (StrUtils.isNotEmpty(condition.getNextStateConditionParser())) {
-                IConditionParser conditionParser = conditionMap.get(condition.getNextStateConditionParser());
+                IConditionParser conditionParser = ApplicationContextHelper.getBean(condition.getNextStateConditionParser());
                 if (conditionParser == null) {
                     throw new ProcessException("未找到条件解析器: " + condition.getNextStateConditionParser());
                 }
@@ -51,7 +49,7 @@ public class ParallelStartGateway implements IGateway {
             }
 
             if (StrUtils.isEmpty(condition.getCondition()) || result) {
-                State nextState = processDefinition.getState(condition.getNextState());
+                State nextState = processDefinition.getState(condition.getNextStateId());
                 nextStates.add(nextState);
             }
         }

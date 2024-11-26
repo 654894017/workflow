@@ -11,7 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 public class ProcessResult {
     private boolean completed;
-    private String processIndidentifier;
+    private String processIdentifier;
     private State currentState;
     private List<State> nextStates;
+
 }

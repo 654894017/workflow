@@ -1,41 +1,23 @@
 package com.damon.workflow.complex;
 
+import com.damon.workflow.Application;
 import com.damon.workflow.ProcessEngine;
 import com.damon.workflow.ProcessInstance;
 import com.damon.workflow.ProcessResult;
-import com.damon.workflow.complex.parser.HighPerformanceReviewConditionParser;
-import com.damon.workflow.complex.parser.ParallelEndConditionParser;
-import com.damon.workflow.complex.parser.StandardReviewConditionParser;
-import com.damon.workflow.complex.processor.*;
 import com.damon.workflow.config.State;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@SpringBootTest(classes = Application.class)
 public class WorkflowComplexConditionParserTest {
     @Test
     public void test() {
-        ProcessInstance processInstance = ProcessInstance.loadYaml("WorkflowComplexConditionParser.yaml");
-        String processIdentifier = processInstance.getProcessIdentifier();
-        processInstance.registerProcessors(
-                new StartProcessor(),
-                new HighPerformanceReviewProcessor(),
-                new StandardReviewProcessor(),
-                new UserTask1Processor(),
-                new UserTask2Processor(),
-                new UserTask3Processor(),
-                new UserTask4Processor()
-        );
-        processInstance.registerConditionParsers(
-                new HighPerformanceReviewConditionParser(),
-                new StandardReviewConditionParser(),
-                new ParallelEndConditionParser()
-        );
         ProcessEngine engine = new ProcessEngine();
-        engine.registerProcessInstance(processInstance);
-
+        String processIdentifier = engine.registerProcessInstance("WorkflowComplexConditionParser.yaml");
         ProcessResult result = engine.process(processIdentifier, new HashMap<>());
         System.out.println("----------------");
         for (State state : result.getNextStates()) {

@@ -1,16 +1,16 @@
 package com.damon.workflow.task;
 
 
-import com.damon.workflow.IConditionParser;
-import com.damon.workflow.IProcessor;
-import com.damon.workflow.ProcessConstant;
-import com.damon.workflow.RuntimeContext;
+import com.damon.workflow.*;
+import com.damon.workflow.condition_parser.IConditionParser;
+import com.damon.workflow.condition_parser.IProcessor;
 import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.StrUtils;
+import com.damon.workflow.utils.spring.ApplicationContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +20,9 @@ import java.util.Set;
 public class UserTask implements ITask {
     private static final Logger logger = LoggerFactory.getLogger(UserTask.class);
 
-    private final CaseInsensitiveMap<IProcessor> processorsMap;
-    private final CaseInsensitiveMap<IConditionParser> conditionMap;
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
 
-    public UserTask(CaseInsensitiveMap<IProcessor> processorsMap, CaseInsensitiveMap<IConditionParser> conditionMap, CaseInsensitiveMap<IEvaluator> evaluatorMap) {
-        this.processorsMap = processorsMap;
-        this.conditionMap = conditionMap;
+    public UserTask(CaseInsensitiveMap<IEvaluator> evaluatorMap) {
         this.evaluatorMap = evaluatorMap;
     }
 
@@ -34,9 +30,10 @@ public class UserTask implements ITask {
     public Set<State> execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
         State currentState = context.getCurrentState();
-
-        // 执行当前状态处理逻辑
-        processCurrentState(currentState.getId(), context);
+        if (StrUtils.isNotEmpty(currentState.getProcessor())) {
+            // 执行当前状态处理逻辑
+            processCurrentState(currentState.getProcessor(), context);
+        }
 
         // 条件解析，判断下一状态
         Set<State> nextStates = determineNextStates(context, currentState, processDefinition);
@@ -55,8 +52,8 @@ public class UserTask implements ITask {
     /**
      * 处理当前状态逻辑
      */
-    private void processCurrentState(String currentStateId, RuntimeContext context) {
-        IProcessor processor = processorsMap.get(currentStateId);
+    private void processCurrentState(String processorClassName, RuntimeContext context) {
+        IProcessor processor = ApplicationContextHelper.getBean(processorClassName);
         if (processor != null) {
             processor.process(context);
         }
@@ -71,7 +68,7 @@ public class UserTask implements ITask {
         boolean result = evaluateCondition(context, currentState);
 
         if (result) {
-            State nextState = definition.getState(currentState.getNextState());
+            State nextState = definition.getState(currentState.getNextStateId());
             if (nextState != null) {
                 nextStates.add(nextState);
             } else {
@@ -91,7 +88,7 @@ public class UserTask implements ITask {
     private boolean evaluateCondition(RuntimeContext context, State currentState) {
         // 优先使用条件解析器
         if (StrUtils.isNotEmpty(currentState.getNextStateConditionParser())) {
-            IConditionParser conditionParser = conditionMap.get(currentState.getNextStateConditionParser());
+            IConditionParser conditionParser = ApplicationContextHelper.getBean(currentState.getNextStateConditionParser());
             if (conditionParser == null) {
                 throw new ProcessException("未找到条件解析器: " + currentState.getNextStateConditionParser());
             }

@@ -5,7 +5,8 @@ processDefinition:
   states:
     - id: "Start"
       type: "UserTask"
-      nextState: "UserTask1"
+      nextStateId: "UserTask1"
+      processor: "com.damon.workflow.complex.processor.StartProcessor"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -15,7 +16,8 @@ processDefinition:
           - submit
     - id: "UserTask1"
       type: "UserTask"
-      nextState: "ReviewGateway"
+      processor: "com.damon.workflow.complex.processor.UserTask1Processor"
+      nextStateId: "ReviewGateway"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -28,13 +30,13 @@ processDefinition:
       type: "ExclusiveGateway"
       conditions:
         - nextStateConditionParser: "com.damon.workflow.complex.parser.HighPerformanceReviewConditionParser"
-          nextState: "HighPerformanceReview"
+          nextStateId: "HighPerformanceReview"
         - nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
-          nextState: "StandardReview"
+          nextStateId: "StandardReview"
 
     - id: "HighPerformanceReview"
       type: "UserTask"
-      nextState: "UserTask2"
+      nextStateId: "UserTask2"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181989"
@@ -47,7 +49,7 @@ processDefinition:
 
     - id: "StandardReview"
       type: "UserTask"
-      nextState: "UserTask2"
+      nextStateId: "UserTask2"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181990"
@@ -59,7 +61,7 @@ processDefinition:
 
     - id: "UserTask2"
       type: "UserTask"
-      nextState: "ParallelStartGateway"
+      nextStateId: "ParallelStartGateway"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -71,16 +73,16 @@ processDefinition:
 
     - id: "ParallelStartGateway"
       type: "ParallelStartGateway"
-      nextState: null
+      nextStateId: null
       conditions:
         - condition: "true"
-          nextState: "UserTask3"
+          nextStateId: "UserTask3"
         - condition: "true"
-          nextState: "UserTask4"
+          nextStateId: "UserTask4"
 
     - id: "UserTask3"
       type: "UserTask"
-      nextState: "ParallelEndGateway"
+      nextStateId: "ParallelEndGateway"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -91,13 +93,13 @@ processDefinition:
 
     - id: "UserTask4"
       type: "UserTask"
-      nextState: "ParallelEndGateway"
+      nextStateId: "ParallelEndGateway"
 
     - id: "ParallelEndGateway"
       type: "ParallelEndGateway"
       nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
-      nextState: "End"
+      nextStateId: "End"
 
     - id: "End"
       type: "End"
-      nextState: null
+      nextStateId: null

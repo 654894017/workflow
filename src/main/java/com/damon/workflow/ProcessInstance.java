@@ -29,20 +29,19 @@ public class ProcessInstance {
     private final CaseInsensitiveMap<ITask> taskMap = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IGateway> gatewayMap = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap = new CaseInsensitiveMap<>();
-    private final CaseInsensitiveMap<IProcessor> processorsMap = new CaseInsensitiveMap<>();
-    private final CaseInsensitiveMap<IConditionParser> conditionsMap = new CaseInsensitiveMap<>();
     private final ProcessDefinition processDefinition;
 
     private ProcessInstance(String content) {
-        taskMap.put(ProcessConstant.USER_TASK, new UserTask(processorsMap, conditionsMap, evaluatorMap));
-        taskMap.put(ProcessConstant.START, new StartTask(processorsMap, conditionsMap, evaluatorMap));
-        taskMap.put(ProcessConstant.END, new EndTask(processorsMap));
-        gatewayMap.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap, conditionsMap));
-        gatewayMap.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap, conditionsMap));
-        gatewayMap.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap, conditionsMap));
+        taskMap.put(ProcessConstant.USER_TASK, new UserTask(evaluatorMap));
+        taskMap.put(ProcessConstant.START, new StartTask(evaluatorMap));
+        taskMap.put(ProcessConstant.END, new EndTask());
+        gatewayMap.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap));
+        gatewayMap.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap));
+        gatewayMap.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap));
         evaluatorMap.put(ProcessConstant.DEFAULT_EVALUATOR, new JavaScriptEvaluator());
         ProcessConfig config = YamlUtils.load(content, ProcessConfig.class);
         this.processDefinition = config.getProcessDefinition();
+
     }
 
     public static ProcessInstance load(String content) {
@@ -52,26 +51,6 @@ public class ProcessInstance {
     public static ProcessInstance loadYaml(String classpathYamlFile) {
         String content = ClasspathFileUtils.readFileAsString(classpathYamlFile);
         return load(content);
-    }
-
-    public void registerConditionParsers(IConditionParser... parsers) {
-        for (IConditionParser parser : parsers) {
-            if (conditionsMap.containsKey(parser.getClass().getName())) {
-                throw new ProcessException("ConditionParser name 重复定义，请检查配置文件，name: " + parser.getClass().getName());
-            }
-            conditionsMap.put(parser.getClass().getName(), parser);
-        }
-    }
-
-    public void registerProcessors(IProcessor... processors) {
-        for (IProcessor processor : processors) {
-            processor.stateIds().forEach(stateId -> {
-                if (processorsMap.containsKey(stateId)) {
-                    throw new ProcessException("Processor stateId 重复定义，请检查配置文件，stateId: " + stateId);
-                }
-                processorsMap.put(stateId, processor);
-            });
-        }
     }
 
     public void registerEvaluator(IEvaluator evaluator) {
@@ -119,12 +98,7 @@ public class ProcessInstance {
      * @return
      */
     public ProcessResult process(String currentStateId, Map<String, Object> variables, String businessId) {
-        // 验证流程配置
-        if (processDefinition == null) {
-            throw new ProcessException("流程ID: " + processDefinition.getIdentifier() + ", 未配置流程信息");
-        }
 
-        // 验证当前状态
         State currentState = processDefinition.getState(currentStateId);
         if (currentState == null) {
             throw new ProcessException("无效的流程状态ID: " + currentStateId);
@@ -206,8 +180,8 @@ public class ProcessInstance {
             if (ProcessConstant.isTaskState(currentType)) {
                 result.add(currentState);
             } else {
-                if (currentState.getNextState() != null) {
-                    State nextState = processDefinition.getState(currentState.getNextState());
+                if (currentState.getNextStateId() != null) {
+                    State nextState = processDefinition.getState(currentState.getNextStateId());
                     findNextStatesRecursive(processDefinition, nextState, context, result);
                 }
             }
@@ -220,7 +194,7 @@ public class ProcessInstance {
         Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables(), context.getBusinessId()));
         nextStates.forEach(state -> {
             if (gatewayState == state) {
-                result.add(gatewayState);
+                result.add(state);
             } else {
                 findNextStatesRecursive(processDefinition, state, context, result);
             }
