@@ -7,11 +7,11 @@ import lombok.Data;
 @Data
 public class NextState {
 
-    private String currentStateIdentifiers;
+    private String currentStateFullPaths;
 
     private State currentState;
 
-    private String nextStateStateIdentifiers;
+    private String nextStateFullPaths;
 
     private State nextState;
 

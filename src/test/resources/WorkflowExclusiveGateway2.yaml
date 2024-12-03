@@ -1,7 +1,7 @@
 processDefinition:
   id: "performanceReview"
   version: "1.0"
-  startState: "Start"
+  startStateId: "Start"
   states:
     - id: "Start"
       type: "Start"

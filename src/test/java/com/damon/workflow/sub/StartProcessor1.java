@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class StartProcessor implements IProcessor {
+public class StartProcessor1 implements IProcessor {
 
     @Override
     public void process(RuntimeContext context) {

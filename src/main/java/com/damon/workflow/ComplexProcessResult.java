@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class ProcessResult3 {
+public class ComplexProcessResult {
     private boolean completed;
     private List<NextState> nextStates;
 }

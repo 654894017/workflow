@@ -1,11 +1,11 @@
 processDefinition:
   id: "performanceReview"
   version: "1.0"
-  startState: "Start"
+  startStateId: "Start"
   states:
     - id: "Start"
       type: "Start"
-      processor: "com.damon.workflow.sub.StartProcessor"
+      processor: "com.damon.workflow.sub.StartProcessor1"
       nextStateId: "SubProcess1"
 
     - id: "SubProcess1"
@@ -21,5 +21,3 @@ processDefinition:
     - id: "End"
       type: "End"
       nextStateId: null
-#  subProcesses:
-#    SubProcess2:1.0: "WorkflowSub.yaml"

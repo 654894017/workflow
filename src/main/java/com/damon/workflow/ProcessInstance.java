@@ -49,11 +49,6 @@ public class ProcessInstance {
         String content = ClasspathFileUtils.readFileAsString(classpathYamlFile);
         return load(content);
     }
-
-    public void registerEvaluator(IEvaluator evaluator) {
-        evaluatorMap.put(evaluator.getName(), evaluator);
-    }
-
     /**
      * 开启流程
      *
@@ -62,7 +57,7 @@ public class ProcessInstance {
      * @return
      */
     public ProcessResult process(Map<String, Object> variables, String businessId) {
-        return process(processDefinition.getStartState(), variables, businessId);
+        return process(processDefinition.getStartStateId(), variables, businessId);
     }
 
     /**
@@ -132,7 +127,7 @@ public class ProcessInstance {
         boolean isCompleted = isCompleted(nextStates, currentState);
         if (isCompleted) {
             ITask endTask = taskMap.get(nextStates.get(0).getType());
-            endTask.execute(context);
+            endTask.execute(new RuntimeContext(processDefinition, nextStates.get(0), variables, businessId));
         }
         return new ProcessResult(isCompleted, processDefinition.getIdentifier(), currentState, nextStates);
     }

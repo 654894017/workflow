@@ -1,6 +1,7 @@
 package com.damon.workflow;
 
 import com.damon.workflow.config.NextState;
+import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.config.StateIdentifier;
 import com.damon.workflow.exception.ProcessException;
@@ -31,30 +32,37 @@ public class ProcessEngine {
         instanceMap.put(identifier, instance);
         return identifier;
     }
-    public ProcessResult3 process(String identifier , Map<String, Object> variables, String businessId) {
-        ProcessInstance instance = instanceMap.get(identifier);
-        return process(new StateIdentifier(identifier, instance.getProcessDefinition().getStartState()), variables, businessId);
+
+    public ComplexProcessResult process(String identifier, Map<String, Object> variables, String businessId) {
+        ProcessInstance instance = getProcessInstance(identifier);
+        ProcessDefinition processDefinition = instance.getProcessDefinition();
+        return process(new StateIdentifier(identifier, processDefinition.getStartStateId()), variables, businessId);
     }
 
-    public ProcessResult3 process(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
+    public ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
         ProcessResult result = process(currentStateIdentifier.getCurrentStateProcessIdentifier(), currentStateIdentifier.getCurrentStateId(), variables, businessId);
         if (result.isCompleted() && currentStateIdentifier.isSubProcess()) {
             State subProcessState = getState(currentStateIdentifier.getParentProcessIdentifier(), currentStateIdentifier.getSubProcessStateId());
-            StateIdentifier identifier = new StateIdentifier(
-                    currentStateIdentifier.getParentProcessIdentifier(), subProcessState.getNextStateId()
+            return process(
+                    new StateIdentifier(
+                            currentStateIdentifier.getParentProcessIdentifier(),
+                            subProcessState.getNextStateId()
+                    ),
+                    variables,
+                    businessId
             );
-            return process(identifier, variables, businessId);
         }
         State currentState = getState(currentStateIdentifier.getCurrentStateProcessIdentifier(), currentStateIdentifier.getCurrentStateId());
         List<NextState> states = new ArrayList<>();
-        result.getNextStates().forEach(nextState -> {
+        result.getNextStates().forEach(state -> {
             StateIdentifier nextStateIdentifier = new StateIdentifier(
-                    currentStateIdentifier.getFullPathsExcludingLast(), nextState.getId()
+                    currentStateIdentifier.getFullPathsExcludingLast(),
+                    state.getId()
             );
-            NextState next = processRecursive(currentStateIdentifier, nextStateIdentifier, currentState, nextState, variables, businessId);
-            states.add(next);
+            NextState nextState = processRecursive(currentStateIdentifier, nextStateIdentifier, currentState, state, variables, businessId);
+            states.add(nextState);
         });
-        return new ProcessResult3(result.isCompleted(), states);
+        return new ComplexProcessResult(result.isCompleted(), states);
     }
 
     /**
@@ -69,33 +77,46 @@ public class ProcessEngine {
     private NextState processRecursive(StateIdentifier currentStateIdentifier, StateIdentifier nextStateIdentifier,
                                        State currentState, State nextState, Map<String, Object> variables, String businessId) {
         String nextStateType = nextState.getType();
-        if (ProcessConstant.isTaskState(nextStateType)) {
-            // 当前节点是任务节点，直接加入结果列表
-            return new NextState(currentStateIdentifier.getFullPaths(), currentState, nextStateIdentifier.getFullPaths(), nextState);
-        } else {
+        if (ProcessConstant.isSubProcessState(nextStateType)) {
             // 当前节点是子流程，递归处理子流程
             String subProcessIdentifier = nextState.getSubProcessIdentifier();
-            ProcessInstance subInstance = instanceMap.get(subProcessIdentifier);
-            if (subInstance == null) {
-                throw new ProcessException("未找到子流程定义，subProcessId: " + subProcessIdentifier);
-            }
-            String subProcessStartStateId = subInstance.getProcessDefinition().getStartState();
+            ProcessInstance subInstance = getProcessInstance(subProcessIdentifier);
+            String subProcessStartStateId = subInstance.getProcessDefinition().getStartStateId();
             State subProcessStartState = getState(subProcessIdentifier, subProcessStartStateId);
             return processRecursive(
                     currentStateIdentifier,
                     new StateIdentifier(
-                            nextStateIdentifier.getCurrentStateProcessIdentifier(), nextState.getId(),
-                            nextState.getSubProcessIdentifier(), subProcessStartStateId
+                            nextStateIdentifier.getCurrentStateProcessIdentifier(),
+                            nextState.getId(),
+                            nextState.getSubProcessIdentifier(),
+                            subProcessStartStateId
                     ),
                     currentState, subProcessStartState, variables, businessId);
         }
+        return new NextState(
+                currentStateIdentifier.getFullPaths(), currentState,
+                nextStateIdentifier.getFullPaths(), nextState
+        );
+    }
+
+    public ProcessInstance getProcessInstance(String identifier) {
+        ProcessInstance instance = instanceMap.get(identifier);
+        if (instance == null) {
+            throw new ProcessException("未找到流程定义，processId: " + identifier);
+        }
+        return instance;
     }
 
     public State getState(String identifier, String stateId) {
-        ProcessInstance instance = instanceMap.get(identifier);
+        ProcessInstance instance = getProcessInstance(identifier);
         return instance.getProcessDefinition().getState(stateId);
     }
-    
+
+    public ProcessResult process(String identifier, Map<String, Object> variables) {
+        ProcessInstance instance = instanceMap.get(identifier);
+        return process(identifier, instance.getProcessDefinition().getStartStateId(), variables, null);
+    }
+
     public ProcessResult process(String identifier, String currentStateId, Map<String, Object> variables, String businessId) {
         ProcessInstance instance = instanceMap.get(identifier);
         return instance.process(currentStateId, variables);

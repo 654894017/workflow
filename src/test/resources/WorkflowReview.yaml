@@ -1,7 +1,7 @@
 processDefinition:
   id: "Review"
   version: "1.0"
-  startState: "Start"
+  startStateId: "Start"
   states:
     - id: "Start"
       type: "UserTask"

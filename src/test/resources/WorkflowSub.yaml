@@ -1,7 +1,7 @@
 processDefinition:
   id: "SubProcess2"
   version: "1.0"
-  startState: "Start"
+  startStateId: "Start"
   states:
     - id: "Start"
       type: "Start"

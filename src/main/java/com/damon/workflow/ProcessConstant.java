@@ -24,4 +24,8 @@ public class ProcessConstant {
         return Stream.of(START, USER_TASK, END).collect(Collectors.toSet()).contains(type);
     }
 
+    public static boolean isSubProcessState(String type) {
+        return Stream.of(SUB_PROCESS).collect(Collectors.toSet()).contains(type);
+    }
+
 }

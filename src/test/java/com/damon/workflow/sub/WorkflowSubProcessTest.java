@@ -4,8 +4,12 @@ package com.damon.workflow.sub;
 import com.damon.workflow.Application;
 import com.damon.workflow.ProcessEngine;
 import com.damon.workflow.ProcessInstance;
+import com.damon.workflow.ComplexProcessResult;
+import com.damon.workflow.config.StateIdentifier;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.HashMap;
 
 @SpringBootTest(classes = Application.class)
 public class WorkflowSubProcessTest {
@@ -16,22 +20,32 @@ public class WorkflowSubProcessTest {
         engine.registerProcessInstance("WorkflowSub.yaml");
         engine.registerProcessInstance(processInstance);
 
-//        ProcessResult2 result = engine.process2(
-//                new StateIdentifier("performanceReview:1.0", "performanceReview:1.0", "Start"), new HashMap<>(), "1"
-//        );
-//
-//        ProcessResult2 result2 = engine.process2(
-//                new StateIdentifier("performanceReview:1.0", "SubProcess2:1.0", "Start"),
-//                new HashMap<>(), "1"
-//        );
-//
-//        ProcessResult2 result3 = engine.process2(
-//                new StateIdentifier("performanceReview:1.0", "SubProcess2:1.0", "aaa"),
-//                new HashMap<>(), "1"
-//        );
-//
+        ComplexProcessResult result = engine.process(
+                new StateIdentifier("performanceReview:1.0", "Start"), new HashMap<>(), "1"
+        );
 
-        System.out.println(1);
+        result.getNextStates().forEach(state -> {
+            System.out.println(state.getNextStateFullPaths());
+        });
+
+        ComplexProcessResult result2 = engine.process(
+                new StateIdentifier("performanceReview:1.0", "SubProcess1", "SubProcess2:1.0", "Start"),
+                new HashMap<>(), "1"
+        );
+
+        result2.getNextStates().forEach(state -> {
+            System.out.println(state.getNextStateFullPaths());
+        });
+
+
+        ComplexProcessResult result3 = engine.process(
+                new StateIdentifier("performanceReview:1.0", "SubProcess1", "SubProcess2:1.0", "aaa"),
+                new HashMap<>(), "1"
+        );
+
+        result3.getNextStates().forEach(state -> {
+            System.out.println(state.getNextStateFullPaths());
+        });
 
 
     }

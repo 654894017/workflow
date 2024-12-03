@@ -13,11 +13,11 @@ public class StateIdentifier {
     private List<String> stateIdentifiers;
 
     public StateIdentifier(String... identifiers) {
-        stateIdentifiers = Arrays.stream(identifiers).collect(Collectors.toList());
+        this.stateIdentifiers = Arrays.stream(identifiers).collect(Collectors.toList());
     }
 
     public StateIdentifier(String identifiers) {
-        stateIdentifiers = StrUtils.split(identifiers, ">").stream().collect(Collectors.toList());
+        this.stateIdentifiers = Arrays.asList(identifiers.split(">"));
     }
 
     public String getFullPaths() {
