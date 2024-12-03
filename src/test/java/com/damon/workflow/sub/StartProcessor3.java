@@ -1,14 +1,17 @@
-package com.damon.workflow.complex.processor;
+package com.damon.workflow.sub;
 
 import com.damon.workflow.RuntimeContext;
 import com.damon.workflow.condition_parser.IProcessor;
 import org.springframework.stereotype.Component;
 
+
 @Component
-public class StandardReviewProcessor implements IProcessor {
+public class StartProcessor3 implements IProcessor {
+
     @Override
     public void process(RuntimeContext context) {
-        System.out.println(context.getCurrentState().getId() + ":" + context.getVariables());
+        System.out.println(this.getClass().getName() + ":" + context.getVariables());
+
     }
 
 }

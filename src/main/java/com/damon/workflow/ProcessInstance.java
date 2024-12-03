@@ -15,10 +15,7 @@ import com.damon.workflow.task.EndTask;
 import com.damon.workflow.task.ITask;
 import com.damon.workflow.task.StartTask;
 import com.damon.workflow.task.UserTask;
-import com.damon.workflow.utils.CaseInsensitiveMap;
-import com.damon.workflow.utils.ClasspathFileUtils;
-import com.damon.workflow.utils.CollUtils;
-import com.damon.workflow.utils.YamlUtils;
+import com.damon.workflow.utils.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,16 +100,16 @@ public class ProcessInstance {
         if (currentState == null) {
             throw new ProcessException("无效的流程状态ID: " + currentStateId);
         }
-
+        Set<State> taskNextStates;
+        // 执行任务
+        RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables, businessId);
         // 获取任务执行器
         ITask task = taskMap.get(currentState.getType());
         if (task == null) {
-            throw new ProcessException("未找到任务类型: " + currentState.getType());
+            taskNextStates = Sets.newHashSet(currentState);
+        } else {
+            taskNextStates = task.execute(context);
         }
-
-        // 执行任务
-        RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables, businessId);
-        Set<State> taskNextStates = task.execute(context);
 
         // 后续节点处理
         List<State> nextStates = new ArrayList<>();
@@ -177,7 +174,7 @@ public class ProcessInstance {
         } else if (ProcessConstant.PARALLEL_END_GATEWAY.equals(currentState.getType())) {
             handleParallelEndGateway(processDefinition, currentState, context, result);
         } else {
-            if (ProcessConstant.isTaskState(currentType)) {
+            if (ProcessConstant.isTaskState(currentType) || currentType.equals(ProcessConstant.SUB_PROCESS)) {
                 result.add(currentState);
             } else {
                 if (currentState.getNextStateId() != null) {
@@ -187,7 +184,6 @@ public class ProcessInstance {
             }
         }
     }
-
 
     private void handleParallelEndGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -12,6 +13,7 @@ public class ProcessDefinition {
     private String version;
     private String startState;
     private List<State> states;
+    //private Map<String, String> subProcesses;
 
     public String getIdentifier() {
         return id + ":" + version;

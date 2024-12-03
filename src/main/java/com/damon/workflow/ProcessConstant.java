@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ProcessConstant {
+    public static final String SUB_PROCESS = "SubProcess";
 
     public static final String START = "Start";
 

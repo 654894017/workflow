@@ -1,6 +1,9 @@
 package com.damon.workflow.utils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class StrUtils {
 
@@ -20,4 +23,7 @@ public class StrUtils {
         return !isEquals(str1, str2);
     }
 
+    public static List<String> split(String processPaths, String regex) {
+        return Arrays.stream(processPaths.split(regex)).collect(Collectors.toList());
+    }
 }

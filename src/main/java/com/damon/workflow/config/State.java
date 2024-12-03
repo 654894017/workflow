@@ -19,4 +19,6 @@ public class State {
     private String nextStateCondition;
     private String nextStateConditionScriptType;
     private String nextStateConditionParser;
+    private String subProcessIdentifier;
+
 }

@@ -1,0 +1,18 @@
+processDefinition:
+  id: "SubProcess2"
+  version: "1.0"
+  startState: "Start"
+  states:
+    - id: "Start"
+      type: "Start"
+      processor: "com.damon.workflow.sub.StartProcessor3"
+      nextStateId: "aaa"
+
+    - id: "aaa"
+      type: "UserTask"
+      processor: "com.damon.workflow.sub.StartProcessor4"
+      nextStateId: "End"
+
+    - id: "End"
+      type: "End"
+      nextStateId: null

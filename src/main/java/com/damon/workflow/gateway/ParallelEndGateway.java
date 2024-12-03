@@ -1,8 +1,8 @@
 package com.damon.workflow.gateway;
 
-import com.damon.workflow.condition_parser.IConditionParser;
 import com.damon.workflow.ProcessConstant;
 import com.damon.workflow.RuntimeContext;
+import com.damon.workflow.condition_parser.IConditionParser;
 import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
