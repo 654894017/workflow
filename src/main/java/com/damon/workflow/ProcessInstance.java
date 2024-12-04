@@ -115,12 +115,12 @@ public class ProcessInstance {
                 nextStates.add(nextState);
                 continue;
             }
-            // 如果是非任务节点，递归查找其后续节点
-            if (!ProcessConstant.isTaskState(nextState.getType())) {
-                nextStates.addAll(findNextStates(processDefinition, nextState, context));
-            } else {
+            if (nextState.isTaskState() || nextState.isSubProcessState()) {
                 // 直接添加任务节点
                 nextStates.add(nextState);
+            } else {
+                // 如果是非任务节点，递归查找其后续节点
+                nextStates.addAll(findNextStates(processDefinition, nextState, context));
             }
         }
 
@@ -162,15 +162,14 @@ public class ProcessInstance {
         if (currentState == null) {
             return;
         }
-        String currentType = currentState.getType();
-        if (ProcessConstant.EXCLUSIVE_GATEWAY.equals(currentState.getType())) {
+        if (currentState.isExclusiveGatewayState()) {
             handleGateway(processDefinition, currentState, context, result);
-        } else if (ProcessConstant.PARALLEL_START_GATEWAY.equals(currentType)) {
+        } else if (currentState.isParallelStartGatewayState()) {
             handleGateway(processDefinition, currentState, context, result);
-        } else if (ProcessConstant.PARALLEL_END_GATEWAY.equals(currentState.getType())) {
+        } else if (currentState.isParallelEndGatewayState()) {
             handleParallelEndGateway(processDefinition, currentState, context, result);
         } else {
-            if (ProcessConstant.isTaskState(currentType)) {
+            if (currentState.isTaskState() || currentState.isSubProcessState()) {
                 result.add(currentState);
             } else {
                 if (currentState.getNextStateId() != null) {

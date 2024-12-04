@@ -36,26 +36,26 @@ public class ProcessEngine {
     /**
      * 开启流程
      *
-     * @param identifier
+     * @param processIdentifier
      * @param variables
      * @return
      */
-    public ComplexProcessResult process(String identifier, Map<String, Object> variables) {
-        return process(identifier, variables, null);
+    public ComplexProcessResult process(String processIdentifier, Map<String, Object> variables) {
+        return process(processIdentifier, variables, null);
     }
 
     /**
      * 开启流程
      *
-     * @param identifier
+     * @param processIdentifier
      * @param variables
      * @param businessId
      * @return
      */
-    public ComplexProcessResult process(String identifier, Map<String, Object> variables, String businessId) {
-        ProcessInstance instance = getProcessInstance(identifier);
+    public ComplexProcessResult process(String processIdentifier, Map<String, Object> variables, String businessId) {
+        ProcessInstance instance = getProcessInstance(processIdentifier);
         ProcessDefinition processDefinition = instance.getProcessDefinition();
-        return process(StateIdentifier.buildByStateIdentifiers(identifier, processDefinition.getStartStateId()), variables, businessId);
+        return process(StateIdentifier.buildByStateIdentifiers(processIdentifier, processDefinition.getStartStateId()), variables, businessId);
     }
 
     /**
@@ -113,8 +113,7 @@ public class ProcessEngine {
      */
     private NextState processRecursive(StateIdentifier currentStateIdentifier, StateIdentifier nextStateIdentifier,
                                        State currentState, State nextState, Map<String, Object> variables, String businessId) {
-        String nextStateType = nextState.getType();
-        if (ProcessConstant.isSubProcessState(nextStateType)) {
+        if (nextState.isSubProcessState()) {
             String subProcessIdentifier = nextState.getSubProcessIdentifier();
             ProcessInstance subProcessInstance = getProcessInstance(subProcessIdentifier);
             String subProcessStartStateId = subProcessInstance.getProcessDefinition().getStartStateId();
@@ -143,7 +142,7 @@ public class ProcessEngine {
     }
 
     private ProcessResult process(String identifier, String currentStateId, Map<String, Object> variables, String businessId) {
-        ProcessInstance instance = instanceMap.get(identifier);
+        ProcessInstance instance = getProcessInstance(identifier);
         return instance.process(currentStateId, variables);
     }
 
