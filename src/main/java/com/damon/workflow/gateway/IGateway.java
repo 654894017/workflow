@@ -3,11 +3,11 @@ package com.damon.workflow.gateway;
 import com.damon.workflow.RuntimeContext;
 import com.damon.workflow.config.State;
 
-import java.util.Set;
+import java.util.List;
 
 public interface IGateway {
 
-    Set<State> execute(RuntimeContext context);
+    List<State> execute(RuntimeContext context);
 
     String getName();
 

@@ -14,8 +14,8 @@ import com.damon.workflow.utils.StrUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,8 +24,8 @@ public class ParallelStartGateway implements IGateway {
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
 
     @Override
-    public Set<State> execute(RuntimeContext context) {
-        Set<State> nextStates = new HashSet<>();
+    public List<State> execute(RuntimeContext context) {
+        List<State> nextStates = new ArrayList<>();
         State state = context.getCurrentState();
         ProcessDefinition processDefinition = context.getProcessDefinition();
         for (Condition condition : state.getConditions()) {

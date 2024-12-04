@@ -9,13 +9,13 @@ import com.damon.workflow.spring.ApplicationContextHelper;
 import com.damon.workflow.utils.StrUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class EndTask implements ITask {
     @Override
-    public Set<State> execute(RuntimeContext context) {
+    public List<State> execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
         State currentState = context.getCurrentState();
         log.info("processId: {}, {}: {} is finshed, variables: {}",
@@ -24,7 +24,7 @@ public class EndTask implements ITask {
         if (StrUtils.isNotEmpty(currentState.getProcessor())) {
             processState(currentState.getProcessor(), context);
         }
-        return new HashSet<>();
+        return new ArrayList<>(0);
     }
 
     private void processState(String processorClassName, RuntimeContext context) {

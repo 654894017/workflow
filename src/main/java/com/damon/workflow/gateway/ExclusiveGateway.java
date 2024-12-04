@@ -14,8 +14,8 @@ import com.damon.workflow.utils.StrUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,10 +24,10 @@ public class ExclusiveGateway implements IGateway {
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
 
     @Override
-    public Set<State> execute(RuntimeContext context) {
+    public List<State> execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
         State gatewayState = context.getCurrentState();
-        Set<State> nextStates = new HashSet<>();
+        List<State> nextStates = new ArrayList<>();
         for (Condition condition : gatewayState.getConditions()) {
             boolean result;
             if (StrUtils.isNotEmpty(condition.getNextStateConditionParser())) {

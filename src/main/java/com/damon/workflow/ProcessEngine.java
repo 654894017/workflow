@@ -33,12 +33,46 @@ public class ProcessEngine {
         return identifier;
     }
 
+    /**
+     * 开启流程
+     *
+     * @param identifier
+     * @param variables
+     * @return
+     */
+    public ComplexProcessResult process(String identifier, Map<String, Object> variables) {
+        return process(identifier, variables, null);
+    }
+
+    /**
+     * 开启流程
+     *
+     * @param identifier
+     * @param variables
+     * @param businessId
+     * @return
+     */
     public ComplexProcessResult process(String identifier, Map<String, Object> variables, String businessId) {
         ProcessInstance instance = getProcessInstance(identifier);
         ProcessDefinition processDefinition = instance.getProcessDefinition();
         return process(StateIdentifier.buildByStateIdentifiers(identifier, processDefinition.getStartStateId()), variables, businessId);
     }
 
+    /**
+     * @param currentStateIdentifier
+     * @param variables
+     * @return
+     */
+    public ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables) {
+        return process(currentStateIdentifier, variables, null);
+    }
+
+    /**
+     * @param currentStateIdentifier
+     * @param variables
+     * @param businessId
+     * @return
+     */
     public ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
         ComplexProcessResult result = doProcess(currentStateIdentifier, variables, businessId);
         result.setCurrentStateIndentifier(currentStateIdentifier);
@@ -95,7 +129,7 @@ public class ProcessEngine {
         return new NextState(nextStateIdentifier.getFullPaths(), nextState);
     }
 
-    public ProcessInstance getProcessInstance(String identifier) {
+    private ProcessInstance getProcessInstance(String identifier) {
         ProcessInstance instance = instanceMap.get(identifier);
         if (instance == null) {
             throw new ProcessException("未找到流程定义，processId: " + identifier);
@@ -103,17 +137,12 @@ public class ProcessEngine {
         return instance;
     }
 
-    public State getState(String identifier, String stateId) {
+    private State getState(String identifier, String stateId) {
         ProcessInstance instance = getProcessInstance(identifier);
         return instance.getProcessDefinition().getState(stateId);
     }
 
-    public ProcessResult process(String identifier, Map<String, Object> variables) {
-        ProcessInstance instance = instanceMap.get(identifier);
-        return process(identifier, instance.getProcessDefinition().getStartStateId(), variables, null);
-    }
-
-    public ProcessResult process(String identifier, String currentStateId, Map<String, Object> variables, String businessId) {
+    private ProcessResult process(String identifier, String currentStateId, Map<String, Object> variables, String businessId) {
         ProcessInstance instance = instanceMap.get(identifier);
         return instance.process(currentStateId, variables);
     }

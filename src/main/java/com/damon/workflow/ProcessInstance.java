@@ -20,7 +20,9 @@ import com.damon.workflow.utils.ClasspathFileUtils;
 import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.YamlUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ProcessInstance {
     private final CaseInsensitiveMap<ITask> taskMap = new CaseInsensitiveMap<>();
@@ -32,7 +34,6 @@ public class ProcessInstance {
         taskMap.put(ProcessConstant.USER_TASK, new UserTask(evaluatorMap));
         taskMap.put(ProcessConstant.START, new StartTask(evaluatorMap));
         taskMap.put(ProcessConstant.END, new EndTask());
-//        taskMap.put(ProcessConstant.SUB_PROCESS, new SubProcessTask());
         gatewayMap.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap));
         gatewayMap.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap));
         gatewayMap.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap));
@@ -98,7 +99,7 @@ public class ProcessInstance {
             throw new ProcessException("无效的流程状态ID: " + currentStateId);
         }
         RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables, businessId);
-        Set<State> taskNextStates = new HashSet<>();
+        List<State> taskNextStates = new ArrayList<>();
         ITask task = taskMap.get(currentState.getType());
         if (task == null) {
             //子流程调用的时候可能传入非任务节点,那么需要找到这个非任务节点的下一个节点
@@ -164,7 +165,7 @@ public class ProcessInstance {
         String currentType = currentState.getType();
         if (ProcessConstant.EXCLUSIVE_GATEWAY.equals(currentState.getType())) {
             handleGateway(processDefinition, currentState, context, result);
-        } else if (currentType.equals(ProcessConstant.PARALLEL_START_GATEWAY)) {
+        } else if (ProcessConstant.PARALLEL_START_GATEWAY.equals(currentType)) {
             handleGateway(processDefinition, currentState, context, result);
         } else if (ProcessConstant.PARALLEL_END_GATEWAY.equals(currentState.getType())) {
             handleParallelEndGateway(processDefinition, currentState, context, result);
@@ -182,7 +183,7 @@ public class ProcessInstance {
 
     private void handleParallelEndGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
-        Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables(), context.getBusinessId()));
+        List<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables(), context.getBusinessId()));
         nextStates.forEach(state -> {
             if (gatewayState == state) {
                 result.add(state);
@@ -194,7 +195,7 @@ public class ProcessInstance {
 
     private void handleGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
-        Set<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables(), context.getBusinessId()));
+        List<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayState, context.getVariables(), context.getBusinessId()));
         nextStates.forEach(state -> {
             findNextStatesRecursive(processDefinition, state, context, result);
         });
@@ -204,7 +205,4 @@ public class ProcessInstance {
         return processDefinition;
     }
 
-    public String getProcessIdentifier() {
-        return processDefinition.getIdentifier();
-    }
 }

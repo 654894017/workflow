@@ -15,8 +15,8 @@ import com.damon.workflow.utils.StrUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class UserTask implements ITask {
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
 
     @Override
-    public Set<State> execute(RuntimeContext context) {
+    public List<State> execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
         State currentState = context.getCurrentState();
         if (StrUtils.isNotEmpty(currentState.getProcessor())) {
@@ -34,7 +34,7 @@ public class UserTask implements ITask {
         }
 
         // 条件解析，判断下一状态
-        Set<State> nextStates = determineNextStates(context, currentState, processDefinition);
+        List<State> nextStates = determineNextStates(context, currentState, processDefinition);
 
         // 记录日志
         logTransitions(processDefinition, currentState, nextStates, context);
@@ -60,8 +60,8 @@ public class UserTask implements ITask {
     /**
      * 确定下一状态集合
      */
-    private Set<State> determineNextStates(RuntimeContext context, State currentState, ProcessDefinition definition) {
-        Set<State> nextStates = new HashSet<>();
+    private List<State> determineNextStates(RuntimeContext context, State currentState, ProcessDefinition definition) {
+        List<State> nextStates = new ArrayList<>();
 
         boolean result = evaluateCondition(context, currentState);
 
@@ -113,7 +113,7 @@ public class UserTask implements ITask {
      * 记录状态流转日志
      */
     private void logTransitions(ProcessDefinition processDefinition, State currentState,
-                                Set<State> nextStates, RuntimeContext context) {
+                                List<State> nextStates, RuntimeContext context) {
         nextStates.forEach(nextState -> log.info("流程ID: {}, 节点类型: {}, 当前状态: {}, 下一状态: {}, 变量: {}",
                 processDefinition.getIdentifier(), getName(), currentState.getId(), nextState.getId(), context.getVariables()));
     }

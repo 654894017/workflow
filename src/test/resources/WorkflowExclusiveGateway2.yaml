@@ -7,7 +7,7 @@ processDefinition:
       type: "Start"
       nextStateId: "StandardReview"
       nextStateCondition: "true"
-      #nextStateIdConditionParser: "com.damon.workflow.exclusive.parser.StandardReviewConditionParser"
+      #nextStateConditionParser: "com.damon.workflow.exclusive.parser.StandardReviewConditionParser"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
