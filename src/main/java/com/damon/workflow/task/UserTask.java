@@ -9,23 +9,20 @@ import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
+import com.damon.workflow.spring.ApplicationContextHelper;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.StrUtils;
-import com.damon.workflow.utils.spring.ApplicationContextHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Slf4j
+@RequiredArgsConstructor
 public class UserTask implements ITask {
-    private static final Logger logger = LoggerFactory.getLogger(UserTask.class);
 
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
-
-    public UserTask(CaseInsensitiveMap<IEvaluator> evaluatorMap) {
-        this.evaluatorMap = evaluatorMap;
-    }
 
     @Override
     public Set<State> execute(RuntimeContext context) {
@@ -73,7 +70,7 @@ public class UserTask implements ITask {
             if (nextState != null) {
                 nextStates.add(nextState);
             } else {
-                logger.warn("流程ID: {}, 当前状态: {} 的下一状态未定义或无效", definition.getIdentifier(), currentState.getId());
+                log.warn("流程ID: {}, 当前状态: {} 的下一状态未定义或无效", definition.getIdentifier(), currentState.getId());
             }
         } else {
             // 条件不满足，停留在当前状态
@@ -117,7 +114,7 @@ public class UserTask implements ITask {
      */
     private void logTransitions(ProcessDefinition processDefinition, State currentState,
                                 Set<State> nextStates, RuntimeContext context) {
-        nextStates.forEach(nextState -> logger.info("流程ID: {}, 任务: {}, 当前状态: {}, 下一状态: {}, 变量: {}",
+        nextStates.forEach(nextState -> log.info("流程ID: {}, 节点类型: {}, 当前状态: {}, 下一状态: {}, 变量: {}",
                 processDefinition.getIdentifier(), getName(), currentState.getId(), nextState.getId(), context.getVariables()));
     }
 }

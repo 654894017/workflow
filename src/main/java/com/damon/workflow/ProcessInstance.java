@@ -15,12 +15,12 @@ import com.damon.workflow.task.EndTask;
 import com.damon.workflow.task.ITask;
 import com.damon.workflow.task.StartTask;
 import com.damon.workflow.task.UserTask;
-import com.damon.workflow.utils.*;
+import com.damon.workflow.utils.CaseInsensitiveMap;
+import com.damon.workflow.utils.ClasspathFileUtils;
+import com.damon.workflow.utils.CollUtils;
+import com.damon.workflow.utils.YamlUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ProcessInstance {
     private final CaseInsensitiveMap<ITask> taskMap = new CaseInsensitiveMap<>();
@@ -32,6 +32,7 @@ public class ProcessInstance {
         taskMap.put(ProcessConstant.USER_TASK, new UserTask(evaluatorMap));
         taskMap.put(ProcessConstant.START, new StartTask(evaluatorMap));
         taskMap.put(ProcessConstant.END, new EndTask());
+//        taskMap.put(ProcessConstant.SUB_PROCESS, new SubProcessTask());
         gatewayMap.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap));
         gatewayMap.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap));
         gatewayMap.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap));
@@ -49,6 +50,7 @@ public class ProcessInstance {
         String content = ClasspathFileUtils.readFileAsString(classpathYamlFile);
         return load(content);
     }
+
     /**
      * 开启流程
      *
@@ -95,17 +97,15 @@ public class ProcessInstance {
         if (currentState == null) {
             throw new ProcessException("无效的流程状态ID: " + currentStateId);
         }
-        Set<State> taskNextStates;
-        // 执行任务
         RuntimeContext context = new RuntimeContext(processDefinition, currentState, variables, businessId);
-        // 获取任务执行器
+        Set<State> taskNextStates = new HashSet<>();
         ITask task = taskMap.get(currentState.getType());
         if (task == null) {
-            taskNextStates = Sets.newHashSet(currentState);
+            //子流程调用的时候可能传入非任务节点,那么需要找到这个非任务节点的下一个节点
+            taskNextStates.addAll(findNextStates(processDefinition, currentState, context));
         } else {
-            taskNextStates = task.execute(context);
+            taskNextStates.addAll(task.execute(context));
         }
-
         // 后续节点处理
         List<State> nextStates = new ArrayList<>();
         for (State nextState : taskNextStates) {
@@ -169,7 +169,7 @@ public class ProcessInstance {
         } else if (ProcessConstant.PARALLEL_END_GATEWAY.equals(currentState.getType())) {
             handleParallelEndGateway(processDefinition, currentState, context, result);
         } else {
-            if (ProcessConstant.isTaskState(currentType) || currentType.equals(ProcessConstant.SUB_PROCESS)) {
+            if (ProcessConstant.isTaskState(currentType)) {
                 result.add(currentState);
             } else {
                 if (currentState.getNextStateId() != null) {

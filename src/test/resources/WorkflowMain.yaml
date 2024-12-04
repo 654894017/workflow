@@ -11,7 +11,16 @@ processDefinition:
     - id: "SubProcess1"
       type: "SubProcess"
       subProcessIdentifier: "SubProcess2:1.0"
-      nextStateId: "StandardReview"
+      nextStateId: "ReviewGateway"
+
+    - id: "ReviewGateway"
+      type: "ExclusiveGateway"
+      conditions:
+        - condition: "false"
+          nextStateId: "End"
+        - condition: "true"
+          nextStateId: "StandardReview"
+
 
     - id: "StandardReview"
       type: "UserTask"

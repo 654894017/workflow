@@ -3,12 +3,10 @@ package com.damon.workflow.task;
 
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.utils.CaseInsensitiveMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class StartTask extends UserTask {
-
-    private final Logger logger = LoggerFactory.getLogger(StartTask.class);
 
     public StartTask(CaseInsensitiveMap<IEvaluator> evaluatorMap) {
         super(evaluatorMap);

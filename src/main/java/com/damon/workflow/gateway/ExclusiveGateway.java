@@ -8,25 +8,20 @@ import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
+import com.damon.workflow.spring.ApplicationContextHelper;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.StrUtils;
-import com.damon.workflow.utils.spring.ApplicationContextHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
 import java.util.Set;
 
-
+@Slf4j
+@RequiredArgsConstructor
 public class ExclusiveGateway implements IGateway {
-    private final Logger logger = LoggerFactory.getLogger(ExclusiveGateway.class);
 
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
-
-    public ExclusiveGateway(CaseInsensitiveMap<IEvaluator> evaluatorMap) {
-        this.evaluatorMap = evaluatorMap;
-    }
-
 
     @Override
     public Set<State> execute(RuntimeContext context) {
@@ -41,7 +36,7 @@ public class ExclusiveGateway implements IGateway {
                     throw new ProcessException("未找到条件解析器: " + condition.getNextStateConditionParser());
                 }
                 result = conditionParser.test(context);
-                logger.info("processId: {}, {}: {}, result: {}, conditionType: {}, variables: {}",
+                log.info("processId: {}, {}: {}, result: {}, conditionType: {}, variables: {}",
                         processDefinition.getIdentifier(), getName(), gatewayState.getId(), result, condition.getNextStateConditionParser(),
                         context.getVariables());
             } else {
@@ -51,7 +46,7 @@ public class ExclusiveGateway implements IGateway {
                     throw new ProcessException("未找到脚本执行器: " + condition.getScriptType());
                 }
                 result = evaluator.evaluate(condition.getCondition(), context);
-                logger.info("processId: {}, {}: {}, result: {}, condition: {}, variables: {}",
+                log.info("processId: {}, {}: {}, result: {}, condition: {}, variables: {}",
                         processDefinition.getIdentifier(), getName(), gatewayState.getId(), result, condition.getCondition(),
                         context.getVariables());
             }

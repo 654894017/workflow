@@ -2,9 +2,9 @@ package com.damon.workflow.sub;
 
 
 import com.damon.workflow.Application;
+import com.damon.workflow.ComplexProcessResult;
 import com.damon.workflow.ProcessEngine;
 import com.damon.workflow.ProcessInstance;
-import com.damon.workflow.ComplexProcessResult;
 import com.damon.workflow.config.StateIdentifier;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +21,7 @@ public class WorkflowSubProcessTest {
         engine.registerProcessInstance(processInstance);
 
         ComplexProcessResult result = engine.process(
-                new StateIdentifier("performanceReview:1.0", "Start"), new HashMap<>(), "1"
+                StateIdentifier.buildByStateIdentifiers("performanceReview:1.0", "Start"), new HashMap<>(), "1"
         );
 
         result.getNextStates().forEach(state -> {
@@ -29,7 +29,7 @@ public class WorkflowSubProcessTest {
         });
 
         ComplexProcessResult result2 = engine.process(
-                new StateIdentifier("performanceReview:1.0", "SubProcess1", "SubProcess2:1.0", "Start"),
+                StateIdentifier.buildByStateIdentifiers("performanceReview:1.0", "SubProcess1", "SubProcess2:1.0", "Start"),
                 new HashMap<>(), "1"
         );
 
@@ -39,7 +39,7 @@ public class WorkflowSubProcessTest {
 
 
         ComplexProcessResult result3 = engine.process(
-                new StateIdentifier("performanceReview:1.0", "SubProcess1", "SubProcess2:1.0", "aaa"),
+                StateIdentifier.buildByStateIdentifiers("performanceReview:1.0", "SubProcess1", "SubProcess2:1.0", "aaa"),
                 new HashMap<>(), "1"
         );
 
@@ -47,6 +47,15 @@ public class WorkflowSubProcessTest {
             System.out.println(state.getNextStateFullPaths());
         });
 
+
+        ComplexProcessResult result4 = engine.process(
+                StateIdentifier.buildByStateIdentifiers("performanceReview:1.0", "StandardReview"),
+                new HashMap<>(), "1"
+        );
+
+        result4.getNextStates().forEach(state -> {
+            System.out.println(state.getNextStateFullPaths());
+        });
 
     }
 }

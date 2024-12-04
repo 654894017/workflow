@@ -1,6 +1,5 @@
 package com.damon.workflow.config;
 
-import com.damon.workflow.utils.StrUtils;
 import lombok.Data;
 
 import java.util.Arrays;
@@ -10,22 +9,48 @@ import java.util.stream.Collectors;
 @Data
 public class StateIdentifier {
 
+    private static final String SEPARATOR = ">";
+
     private List<String> stateIdentifiers;
 
-    public StateIdentifier(String... identifiers) {
+    private StateIdentifier(String... identifiers) {
         this.stateIdentifiers = Arrays.stream(identifiers).collect(Collectors.toList());
     }
 
-    public StateIdentifier(String identifiers) {
-        this.stateIdentifiers = Arrays.asList(identifiers.split(">"));
+    private StateIdentifier(String stateFullPaths) {
+        this.stateIdentifiers = Arrays.asList(stateFullPaths.split(SEPARATOR));
+    }
+
+    public static StateIdentifier buildByStateIdentifiers(String... stateIdentifiers) {
+        return new StateIdentifier(stateIdentifiers);
+    }
+
+    public static StateIdentifier build(String stateFullPaths, String... stateIdentifiers) {
+        String statePath = Arrays.stream(stateIdentifiers).collect(Collectors.joining(SEPARATOR));
+        return new StateIdentifier(stateFullPaths + SEPARATOR + statePath);
+    }
+
+    /**
+     * 主流程id > 子流程节点id > 子流程id > 子流程节点id,
+     * <p>
+     * 例如: performanceReview:1.0 > SubProcess1 > SubProcess2:1.0 > Start
+     *
+     * @param stateFullPaths
+     */
+    public static StateIdentifier build(String stateFullPaths) {
+        return new StateIdentifier(stateFullPaths);
     }
 
     public String getFullPaths() {
-        return stateIdentifiers.stream().collect(Collectors.joining(">"));
+        return stateIdentifiers.stream().collect(Collectors.joining(SEPARATOR));
     }
 
     public String getFullPathsExcludingLast() {
-        return stateIdentifiers.subList(0, stateIdentifiers.size() - 1).stream().collect(Collectors.joining(">"));
+        return stateIdentifiers.subList(0, stateIdentifiers.size() - 1).stream().collect(Collectors.joining(SEPARATOR));
+    }
+
+    public String getParentProcessFullPaths() {
+        return stateIdentifiers.subList(0, stateIdentifiers.size() - 3).stream().collect(Collectors.joining(SEPARATOR));
     }
 
     public String getParentProcessIdentifier() {

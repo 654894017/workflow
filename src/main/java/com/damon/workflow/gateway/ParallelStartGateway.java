@@ -8,23 +8,20 @@ import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
+import com.damon.workflow.spring.ApplicationContextHelper;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.StrUtils;
-import com.damon.workflow.utils.spring.ApplicationContextHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Slf4j
+@RequiredArgsConstructor
 public class ParallelStartGateway implements IGateway {
-    private final Logger logger = LoggerFactory.getLogger(ParallelStartGateway.class);
 
     private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
-
-    public ParallelStartGateway(CaseInsensitiveMap<IEvaluator> evaluatorMap) {
-        this.evaluatorMap = evaluatorMap;
-    }
 
     @Override
     public Set<State> execute(RuntimeContext context) {
@@ -54,7 +51,7 @@ public class ParallelStartGateway implements IGateway {
             }
         }
         nextStates.forEach(nextState -> {
-            logger.info("processId: {}, {}: {}, nextState:{}, variables: {}",
+            log.info("processId: {}, {}: {}, nextState:{}, variables: {}",
                     processDefinition.getIdentifier(), getName(), state.getId(), nextState.getId(), context.getVariables()
             );
         });

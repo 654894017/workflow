@@ -1,4 +1,4 @@
-package com.damon.workflow.utils.spring;
+package com.damon.workflow.spring;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

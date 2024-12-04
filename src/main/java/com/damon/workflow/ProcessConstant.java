@@ -21,7 +21,7 @@ public class ProcessConstant {
     public static final String DEFAULT_EVALUATOR = "JavaScript";
 
     public static boolean isTaskState(String type) {
-        return Stream.of(START, USER_TASK, END).collect(Collectors.toSet()).contains(type);
+        return Stream.of(START, USER_TASK, END, SUB_PROCESS).collect(Collectors.toSet()).contains(type);
     }
 
     public static boolean isSubProcessState(String type) {
