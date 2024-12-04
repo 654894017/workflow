@@ -10,7 +10,7 @@ import java.util.Map;
 public class WorkflowReviewTest {
     @Test
     public void test() {
-        ProcessInstance engine = ProcessInstance.loadYaml("WorkflowReview.yaml");
+        ProcessInstance engine = ProcessInstance.loadYaml("flow/WorkflowReview.yaml");
         HashMap params1 = new HashMap<>();
         params1.put("a", 20);
         ProcessResult result = engine.process(params1);

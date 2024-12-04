@@ -1,8 +1,5 @@
 package com.damon.workflow;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class ProcessConstant {
     public static final String SUB_PROCESS = "SubProcess";
 
@@ -19,8 +16,4 @@ public class ProcessConstant {
     public static final String PARALLEL_END_GATEWAY = "ParallelEndGateway";
 
     public static final String DEFAULT_EVALUATOR = "JavaScript";
-
-    public static boolean isTaskState(String type) {
-        return Stream.of(START, USER_TASK, END).collect(Collectors.toSet()).contains(type);
-    }
 }

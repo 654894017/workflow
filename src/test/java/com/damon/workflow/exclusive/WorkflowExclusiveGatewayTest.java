@@ -13,7 +13,7 @@ import java.util.Map;
 public class WorkflowExclusiveGatewayTest {
     @Test
     public void test() {
-        ProcessInstance engine = ProcessInstance.loadYaml("WorkflowExclusiveGateway.yaml");
+        ProcessInstance engine = ProcessInstance.loadYaml("flow/WorkflowExclusiveGateway.yaml");
         Map<String, Object> params = new HashMap<>();
         params.put("employeePerformance", 85);
 

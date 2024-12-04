@@ -6,6 +6,10 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.damon.workflow.ProcessConstant.*;
 
 @Getter
 @Setter
@@ -27,19 +31,19 @@ public class State {
     }
 
     public boolean isTaskState() {
-        return ProcessConstant.isTaskState(type);
+        return Stream.of(START, USER_TASK, END).collect(Collectors.toSet()).contains(type);
     }
 
     public boolean isExclusiveGatewayState() {
-        return ProcessConstant.EXCLUSIVE_GATEWAY.equals(type);
+        return EXCLUSIVE_GATEWAY.equals(type);
     }
 
     public boolean isParallelStartGatewayState() {
-        return ProcessConstant.PARALLEL_START_GATEWAY.equals(type);
+        return PARALLEL_START_GATEWAY.equals(type);
     }
 
     public boolean isParallelEndGatewayState() {
-        return ProcessConstant.PARALLEL_END_GATEWAY.equals(type);
+        return PARALLEL_END_GATEWAY.equals(type);
     }
 
 }

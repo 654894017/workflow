@@ -15,10 +15,7 @@ public class WorkflowSubProcessTest {
     @Test
     public void test() {
         ProcessEngine engine = new ProcessEngine();
-        String processIdentifier = engine.registerProcessInstance("WorkflowMain.yaml");
-        engine.registerProcessInstance("WorkflowSub.yaml");
-
-        ComplexProcessResult result = engine.process(processIdentifier, new HashMap<>());
+        ComplexProcessResult result = engine.process("WorkflowMain:1.0", new HashMap<>());
 
         result.getNextStates().forEach(state -> {
             System.out.println(state.getNextStateFullPaths());

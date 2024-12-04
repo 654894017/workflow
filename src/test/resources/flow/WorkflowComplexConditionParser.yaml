@@ -1,11 +1,12 @@
 processDefinition:
-  id: "performanceReview"
+  id: "WorkflowComplexConditionParser"
   version: "1.0"
   startStateId: "Start"
   states:
     - id: "Start"
       type: "UserTask"
       nextStateId: "UserTask1"
+      processor: "com.damon.workflow.complex.processor.StartProcessor"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -15,6 +16,7 @@ processDefinition:
           - submit
     - id: "UserTask1"
       type: "UserTask"
+      processor: "com.damon.workflow.complex.processor.UserTask1Processor"
       nextStateId: "ReviewGateway"
       extendParams:
         assigneeRole: "Manager"
@@ -27,9 +29,9 @@ processDefinition:
     - id: "ReviewGateway"
       type: "ExclusiveGateway"
       conditions:
-        - condition: "a>85"
+        - nextStateConditionParser: "com.damon.workflow.complex.parser.HighPerformanceReviewConditionParser"
           nextStateId: "HighPerformanceReview"
-        - condition: "a<=85"
+        - nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
           nextStateId: "StandardReview"
 
     - id: "HighPerformanceReview"
@@ -56,6 +58,7 @@ processDefinition:
           - agree
           - reject
 
+
     - id: "UserTask2"
       type: "UserTask"
       nextStateId: "ParallelStartGateway"
@@ -66,6 +69,7 @@ processDefinition:
           - review_base_info
         actions:
           - submit
+
 
     - id: "ParallelStartGateway"
       type: "ParallelStartGateway"
@@ -90,17 +94,10 @@ processDefinition:
     - id: "UserTask4"
       type: "UserTask"
       nextStateId: "ParallelEndGateway"
-      extendParams:
-        assigneeRole: "Manager"
-        assigneeUser: "181987"
-        allowEditingResouces:
-          - review_base_info
-        actions:
-          - submit
 
     - id: "ParallelEndGateway"
       type: "ParallelEndGateway"
-      nextStateCondition: "test"
+      nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
       nextStateId: "End"
 
     - id: "End"

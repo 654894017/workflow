@@ -5,18 +5,27 @@ import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.config.StateIdentifier;
 import com.damon.workflow.exception.ProcessException;
-import com.damon.workflow.utils.ClasspathFileUtils;
+import com.damon.workflow.utils.classpath.ClasspathFileUtils;
+import com.damon.workflow.utils.classpath.ClasspathFlowFileLoader;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class ProcessEngine {
 
     private Map<String, ProcessInstance> instanceMap = new ConcurrentHashMap<>();
 
     public ProcessEngine() {
+        ClasspathFlowFileLoader loader = new ClasspathFlowFileLoader();
+        List<String> flows = loader.loadFilesFromFlowFolder();
+        flows.forEach(content -> {
+            String processIdentifier = registerProcessInstance(ProcessInstance.load(content));
+            log.info("register process: [{}] succeeded", processIdentifier);
+        });
     }
 
     public String registerProcessInstance(String classpathYamlFile) {

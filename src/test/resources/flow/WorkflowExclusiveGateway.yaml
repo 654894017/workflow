@@ -1,5 +1,5 @@
 processDefinition:
-  id: "performanceReview"
+  id: "WorkflowExclusiveGateway"
   version: "1.0"
   startStateId: "Start"
   states:

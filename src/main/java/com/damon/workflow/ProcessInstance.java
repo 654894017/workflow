@@ -16,9 +16,9 @@ import com.damon.workflow.task.ITask;
 import com.damon.workflow.task.StartTask;
 import com.damon.workflow.task.UserTask;
 import com.damon.workflow.utils.CaseInsensitiveMap;
-import com.damon.workflow.utils.ClasspathFileUtils;
 import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.YamlUtils;
+import com.damon.workflow.utils.classpath.ClasspathFileUtils;
 
 import java.util.ArrayList;
 import java.util.List;

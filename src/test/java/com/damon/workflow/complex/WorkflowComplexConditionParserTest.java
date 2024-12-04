@@ -16,8 +16,7 @@ public class WorkflowComplexConditionParserTest {
     @Test
     public void test() {
         ProcessEngine engine = new ProcessEngine();
-        String processIdentifier = engine.registerProcessInstance("WorkflowComplexConditionParser.yaml");
-        ComplexProcessResult result = engine.process(processIdentifier, new HashMap<>(), "1");
+        ComplexProcessResult result = engine.process("WorkflowComplexConditionParser:1.0", new HashMap<>(), "1");
         System.out.println("----------------");
         for (NextState nextState : result.getNextStates()) {
             System.out.println(nextState.getNextStateFullPaths());

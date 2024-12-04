@@ -12,7 +12,7 @@ import java.util.Map;
 public class WorkflowComplexTest {
     @Test
     public void test() {
-        ProcessInstance engine = ProcessInstance.loadYaml("WorkflowComplex.yaml");
+        ProcessInstance engine = ProcessInstance.loadYaml("flow/WorkflowComplex.yaml");
 
         ProcessResult result = engine.process(new HashMap<>());
         System.out.println("----------------");

@@ -1,12 +1,11 @@
 processDefinition:
-  id: "performanceReview"
+  id: "WorkflowComplex"
   version: "1.0"
   startStateId: "Start"
   states:
     - id: "Start"
       type: "UserTask"
       nextStateId: "UserTask1"
-      processor: "com.damon.workflow.complex.processor.StartProcessor"
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -16,7 +15,6 @@ processDefinition:
           - submit
     - id: "UserTask1"
       type: "UserTask"
-      processor: "com.damon.workflow.complex.processor.UserTask1Processor"
       nextStateId: "ReviewGateway"
       extendParams:
         assigneeRole: "Manager"
@@ -29,9 +27,9 @@ processDefinition:
     - id: "ReviewGateway"
       type: "ExclusiveGateway"
       conditions:
-        - nextStateConditionParser: "com.damon.workflow.complex.parser.HighPerformanceReviewConditionParser"
+        - condition: "a>85"
           nextStateId: "HighPerformanceReview"
-        - nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
+        - condition: "a<=85"
           nextStateId: "StandardReview"
 
     - id: "HighPerformanceReview"
@@ -58,7 +56,6 @@ processDefinition:
           - agree
           - reject
 
-
     - id: "UserTask2"
       type: "UserTask"
       nextStateId: "ParallelStartGateway"
@@ -69,7 +66,6 @@ processDefinition:
           - review_base_info
         actions:
           - submit
-
 
     - id: "ParallelStartGateway"
       type: "ParallelStartGateway"
@@ -94,10 +90,17 @@ processDefinition:
     - id: "UserTask4"
       type: "UserTask"
       nextStateId: "ParallelEndGateway"
+      extendParams:
+        assigneeRole: "Manager"
+        assigneeUser: "181987"
+        allowEditingResouces:
+          - review_base_info
+        actions:
+          - submit
 
     - id: "ParallelEndGateway"
       type: "ParallelEndGateway"
-      nextStateConditionParser: "com.damon.workflow.complex.parser.StandardReviewConditionParser"
+      nextStateCondition: "test"
       nextStateId: "End"
 
     - id: "End"
