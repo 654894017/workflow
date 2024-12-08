@@ -89,7 +89,10 @@ public class ProcessEngine {
     }
 
     private ComplexProcessResult doProcess(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
-        ProcessResult result = process(currentStateIdentifier.getCurrentStateProcessIdentifier(), currentStateIdentifier.getCurrentStateId(), variables, businessId);
+        ProcessResult result = process(
+                currentStateIdentifier.getCurrentStateProcessIdentifier(),
+                currentStateIdentifier.getCurrentStateId(), variables, businessId
+        );
         if (result.isCompleted() && currentStateIdentifier.isSubProcess()) {
             State subProcessState = getState(currentStateIdentifier.getParentProcessIdentifier(), currentStateIdentifier.getSubProcessStateId());
             return doProcess(
@@ -97,44 +100,32 @@ public class ProcessEngine {
                     variables, businessId
             );
         }
-        State currentState = getState(currentStateIdentifier.getCurrentStateProcessIdentifier(), currentStateIdentifier.getCurrentStateId());
         List<NextState> nextStates = new ArrayList<>();
         result.getNextStates().forEach(state -> {
-            StateIdentifier nextStateIdentifier = StateIdentifier.build(
-                    currentStateIdentifier.getFullPathsExcludingLast(), state.getId()
-            );
-            NextState nextState = processRecursive(currentStateIdentifier, nextStateIdentifier, currentState, state, variables, businessId);
-            nextStates.add(nextState);
+            StateIdentifier stateIdentifier = StateIdentifier.build(currentStateIdentifier.getFullPathsExcludingLast(), state.getId());
+            if (state.isSubProcessState()) {
+                nextStates.add(getSubProcessStartState(stateIdentifier, state));
+            } else {
+                nextStates.add(new NextState(stateIdentifier.getFullPaths(), state));
+            }
         });
         return new ComplexProcessResult(result.isCompleted(), nextStates);
     }
 
     /**
-     * 递归处理流程节点，找到所有任务节点或子流程中的任务节点
-     *
-     * @param currentStateIdentifier
-     * @param nextStateIdentifier
-     * @param currentState
-     * @param nextState
-     * @param variables
-     * @param businessId
+     * @param stateIdentifier
+     * @param state
      * @return
      */
-    private NextState processRecursive(StateIdentifier currentStateIdentifier, StateIdentifier nextStateIdentifier,
-                                       State currentState, State nextState, Map<String, Object> variables, String businessId) {
-        if (nextState.isSubProcessState()) {
-            String subProcessIdentifier = nextState.getSubProcessIdentifier();
-            ProcessInstance subProcessInstance = getProcessInstance(subProcessIdentifier);
-            String subProcessStartStateId = subProcessInstance.getProcessDefinition().getStartStateId();
-            State subProcessStartState = getState(subProcessIdentifier, subProcessStartStateId);
-            return processRecursive(
-                    currentStateIdentifier,
-                    StateIdentifier.build(
-                            nextStateIdentifier.getFullPaths(), nextState.getSubProcessIdentifier(), subProcessStartStateId
-                    ),
-                    currentState, subProcessStartState, variables, businessId);
-        }
-        return new NextState(nextStateIdentifier.getFullPaths(), nextState);
+    private NextState getSubProcessStartState(StateIdentifier stateIdentifier, State state) {
+        String subProcessIdentifier = state.getSubProcessIdentifier();
+        ProcessInstance subProcessInstance = getProcessInstance(subProcessIdentifier);
+        String subProcessStartStateId = subProcessInstance.getProcessDefinition().getStartStateId();
+        State subProcessStartState = getState(subProcessIdentifier, subProcessStartStateId);
+        return new NextState(
+                StateIdentifier.build(stateIdentifier.getFullPaths(), state.getSubProcessIdentifier(), subProcessStartStateId).getFullPaths(),
+                subProcessStartState
+        );
     }
 
     private ProcessInstance getProcessInstance(String identifier) {

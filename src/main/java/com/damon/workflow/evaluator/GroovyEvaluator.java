@@ -3,14 +3,12 @@ package com.damon.workflow.evaluator;
 
 import com.damon.workflow.RuntimeContext;
 import com.damon.workflow.exception.ScriptExecutionException;
-import org.springframework.stereotype.Component;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-@Component
 public class GroovyEvaluator implements IEvaluator {
 
     private ScriptEngine engine = new ScriptEngineManager().getEngineByName(getName());

@@ -133,7 +133,7 @@ public class ProcessInstance {
         return new ProcessResult(isCompleted, processDefinition.getIdentifier(), currentState, nextStates);
     }
 
-    public boolean isCompleted(List<State> nextStates, State currentState) {
+    private boolean isCompleted(List<State> nextStates, State currentState) {
         if (CollUtils.isEmpty(nextStates)) {
             throw new ProcessException("流程ID: " + processDefinition.getIdentifier() + ", 任务ID: " + currentState.getId() + ", 异常结束,请确认流程设计是否正确");
         }
@@ -148,7 +148,7 @@ public class ProcessInstance {
      * @param context           执行上下文，包括条件变量等
      * @return 后续所有待执行的节点集合
      */
-    public List<State> findNextStates(ProcessDefinition processDefinition, State currentState, RuntimeContext context) {
+    private List<State> findNextStates(ProcessDefinition processDefinition, State currentState, RuntimeContext context) {
         List<State> nextStates = new ArrayList<>();
         findNextStatesRecursive(processDefinition, currentState, context, nextStates);
         return nextStates;
