@@ -21,6 +21,9 @@ public class WorkflowSubProcessTest {
             System.out.println(state.getNextStateFullPaths());
         });
 
+        String stateProcessResult = result.getStateProcessResult();
+        System.out.println(stateProcessResult);
+
         ComplexProcessResult result2 = engine.process(
                 StateIdentifier.build(result.getNextStates().get(0).getNextStateFullPaths()), new HashMap<>()
         );
@@ -29,7 +32,6 @@ public class WorkflowSubProcessTest {
             System.out.println(state.getNextStateFullPaths());
         });
 
-
         ComplexProcessResult result3 = engine.process(
                 StateIdentifier.build(result2.getNextStates().get(0).getNextStateFullPaths()), new HashMap<>()
         );
@@ -37,7 +39,6 @@ public class WorkflowSubProcessTest {
         result3.getNextStates().forEach(state -> {
             System.out.println(state.getNextStateFullPaths());
         });
-
 
         ComplexProcessResult result4 = engine.process(
                 StateIdentifier.build(result3.getNextStates().get(0).getNextStateFullPaths()), new HashMap<>()

@@ -8,7 +8,7 @@ import java.util.List;
 
 class ClasspathFlowFileLoaderTest {
     @Test
-    public void test()  {
+    public void test() {
         ClasspathFlowFileLoader loader = new ClasspathFlowFileLoader();
         List<String> files = loader.loadFilesFromFlowFolder();
         files.forEach(fileContent -> {

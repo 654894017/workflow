@@ -85,6 +85,7 @@ public class ProcessEngine {
     public ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
         ComplexProcessResult result = doProcess(currentStateIdentifier, variables, businessId);
         result.setCurrentStateIndentifier(currentStateIdentifier);
+        result.setStateProcesResult(variables.get(ProcessConstant.STATE_PROCESS_RESULT));
         return result;
     }
 
@@ -136,7 +137,15 @@ public class ProcessEngine {
         return instance;
     }
 
-    private State getState(String identifier, String stateId) {
+    /**
+     * 获取流程步骤的描述信息
+     *
+     *
+     * @param identifier
+     * @param stateId
+     * @return
+     */
+    public State getState(String identifier, String stateId) {
         ProcessInstance instance = getProcessInstance(identifier);
         return instance.getProcessDefinition().getState(stateId);
     }

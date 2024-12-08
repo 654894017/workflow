@@ -11,7 +11,7 @@ public class StartProcessor4 implements IProcessor {
     @Override
     public void process(RuntimeContext context) {
         System.out.println(this.getClass().getName() + ":" + context.getVariables());
-
+        context.setStateProcessResult("StartProcessor4");
     }
 
 }

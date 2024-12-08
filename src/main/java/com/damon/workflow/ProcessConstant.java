@@ -16,4 +16,6 @@ public class ProcessConstant {
     public static final String PARALLEL_END_GATEWAY = "ParallelEndGateway";
 
     public static final String DEFAULT_EVALUATOR = "JavaScript";
+
+    public static final String STATE_PROCESS_RESULT = "state_process_result";
 }

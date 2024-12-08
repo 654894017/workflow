@@ -15,4 +15,8 @@ public class RuntimeContext {
     private final State currentState;
     private final Map<String, Object> variables;
     private final String businessId;
+
+    public void setStateProcessResult(Object result){
+        variables.put(ProcessConstant.STATE_PROCESS_RESULT, result);
+    }
 }
