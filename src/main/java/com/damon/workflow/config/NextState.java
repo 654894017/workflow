@@ -12,6 +12,6 @@ public class NextState {
     private State nextState;
 
     public StateIdentifier getNextStateIdentifier() {
-        return StateIdentifier.build(nextStateFullPaths);
+        return StateIdentifier.buildFromFullPaths(nextStateFullPaths);
     }
 }

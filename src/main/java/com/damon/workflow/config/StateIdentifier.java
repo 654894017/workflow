@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ *
+ */
 @Data
 public class StateIdentifier {
 
@@ -21,11 +24,11 @@ public class StateIdentifier {
         this.stateIdentifiers = Arrays.asList(stateFullPaths.split(SEPARATOR));
     }
 
-    public static StateIdentifier buildByStateIdentifiers(String... stateIdentifiers) {
+    public static StateIdentifier buildFromIdentifiers(String... stateIdentifiers) {
         return new StateIdentifier(stateIdentifiers);
     }
 
-    public static StateIdentifier build(String stateFullPaths, String... stateIdentifiers) {
+    public static StateIdentifier buildFromFullPaths(String stateFullPaths, String... stateIdentifiers) {
         String statePath = Arrays.stream(stateIdentifiers).collect(Collectors.joining(SEPARATOR));
         return new StateIdentifier(stateFullPaths + SEPARATOR + statePath);
     }
@@ -37,7 +40,7 @@ public class StateIdentifier {
      *
      * @param stateFullPaths
      */
-    public static StateIdentifier build(String stateFullPaths) {
+    public static StateIdentifier buildFromFullPaths(String stateFullPaths) {
         return new StateIdentifier(stateFullPaths);
     }
 
@@ -48,6 +51,7 @@ public class StateIdentifier {
     public String getFullPathsExcludingLast() {
         return stateIdentifiers.subList(0, stateIdentifiers.size() - 1).stream().collect(Collectors.joining(SEPARATOR));
     }
+
 
     public String getParentProcessFullPaths() {
         return stateIdentifiers.subList(0, stateIdentifiers.size() - 3).stream().collect(Collectors.joining(SEPARATOR));
@@ -72,5 +76,4 @@ public class StateIdentifier {
     public String getCurrentStateId() {
         return stateIdentifiers.get(stateIdentifiers.size() - 1);
     }
-
 }

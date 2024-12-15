@@ -23,19 +23,19 @@ public class WorkflowComplexConditionParserTest {
         }
         Map<String, Object> params2 = new HashMap<>();
         params2.put("employeePerformance", 60);
-        ComplexProcessResult result2 = engine.process(StateIdentifier.build(result.getNextStates().get(0).getNextStateFullPaths()), params2, "1");
+        ComplexProcessResult result2 = engine.process(StateIdentifier.buildFromFullPaths(result.getNextStates().get(0).getNextStateFullPaths()), params2, "1");
         System.out.println("----------------");
         for (NextState nextState : result2.getNextStates()) {
             System.out.println(nextState.getNextStateFullPaths());
         }
 
-        ComplexProcessResult result3 = engine.process(StateIdentifier.build(result2.getNextStates().get(0).getNextStateFullPaths()), params2, "1");
+        ComplexProcessResult result3 = engine.process(StateIdentifier.buildFromFullPaths(result2.getNextStates().get(0).getNextStateFullPaths()), params2, "1");
         System.out.println("----------------");
         for (NextState nextState : result3.getNextStates()) {
             System.out.println(nextState.getNextStateFullPaths());
         }
 
-        ComplexProcessResult result4 = engine.process(StateIdentifier.build(result3.getNextStates().get(0).getNextStateFullPaths()), params2, "1");
+        ComplexProcessResult result4 = engine.process(StateIdentifier.buildFromFullPaths(result3.getNextStates().get(0).getNextStateFullPaths()), params2, "1");
         System.out.println("----------------");
         for (NextState nextState : result4.getNextStates()) {
             System.out.println(nextState.getNextStateFullPaths());
@@ -43,7 +43,7 @@ public class WorkflowComplexConditionParserTest {
 
         HashMap params4 = new HashMap<>();
         params4.put("employeePerformance", 90);
-        ComplexProcessResult result5 = engine.process(StateIdentifier.build(result4.getNextStates().get(0).getNextStateFullPaths()), params4, "1");
+        ComplexProcessResult result5 = engine.process(StateIdentifier.buildFromFullPaths(result4.getNextStates().get(0).getNextStateFullPaths()), params4, "1");
         System.out.println("----------------");
         for (NextState nextState : result5.getNextStates()) {
             System.out.println(nextState.getNextStateFullPaths());
@@ -51,7 +51,7 @@ public class WorkflowComplexConditionParserTest {
 
         HashMap params5 = new HashMap<>();
         params5.put("employeePerformance", 50);
-        ComplexProcessResult result6 = engine.process(StateIdentifier.build(result4.getNextStates().get(1).getNextStateFullPaths()), params5, "1");
+        ComplexProcessResult result6 = engine.process(StateIdentifier.buildFromFullPaths(result4.getNextStates().get(1).getNextStateFullPaths()), params5, "1");
         System.out.println("----------------");
         for (NextState nextState : result6.getNextStates()) {
             System.out.println(nextState.getNextStateFullPaths());

@@ -64,7 +64,7 @@ public class ProcessEngine {
     public ComplexProcessResult process(String processIdentifier, Map<String, Object> variables, String businessId) {
         ProcessInstance instance = getProcessInstance(processIdentifier);
         ProcessDefinition processDefinition = instance.getProcessDefinition();
-        return process(StateIdentifier.buildByStateIdentifiers(processIdentifier, processDefinition.getStartStateId()), variables, businessId);
+        return process(StateIdentifier.buildFromIdentifiers(processIdentifier, processDefinition.getStartStateId()), variables, businessId);
     }
 
     /**
@@ -97,13 +97,13 @@ public class ProcessEngine {
         if (result.isCompleted() && currentStateIdentifier.isSubProcess()) {
             State subProcessState = getState(currentStateIdentifier.getParentProcessIdentifier(), currentStateIdentifier.getSubProcessStateId());
             return doProcess(
-                    StateIdentifier.build(currentStateIdentifier.getParentProcessFullPaths(), subProcessState.getNextStateId()),
+                    StateIdentifier.buildFromFullPaths(currentStateIdentifier.getParentProcessFullPaths(), subProcessState.getNextStateId()),
                     variables, businessId
             );
         }
         List<NextState> nextStates = new ArrayList<>();
         result.getNextStates().forEach(state -> {
-            StateIdentifier stateIdentifier = StateIdentifier.build(currentStateIdentifier.getFullPathsExcludingLast(), state.getId());
+            StateIdentifier stateIdentifier = StateIdentifier.buildFromFullPaths(currentStateIdentifier.getFullPathsExcludingLast(), state.getId());
             if (state.isSubProcessState()) {
                 nextStates.add(getSubProcessStartState(stateIdentifier, state));
             } else {
@@ -124,7 +124,7 @@ public class ProcessEngine {
         String subProcessStartStateId = subProcessInstance.getProcessDefinition().getStartStateId();
         State subProcessStartState = getState(subProcessIdentifier, subProcessStartStateId);
         return new NextState(
-                StateIdentifier.build(stateIdentifier.getFullPaths(), state.getSubProcessIdentifier(), subProcessStartStateId).getFullPaths(),
+                StateIdentifier.buildFromFullPaths(stateIdentifier.getFullPaths(), state.getSubProcessIdentifier(), subProcessStartStateId).getFullPaths(),
                 subProcessStartState
         );
     }
