@@ -4,8 +4,8 @@ package com.damon.workflow;
 import com.damon.workflow.config.ProcessConfig;
 import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
+import com.damon.workflow.evaluator.DefaultEvaluator;
 import com.damon.workflow.evaluator.IEvaluator;
-import com.damon.workflow.evaluator.JavaScriptEvaluator;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.gateway.ExclusiveGateway;
 import com.damon.workflow.gateway.IGateway;
@@ -27,29 +27,27 @@ import java.util.Map;
 public class ProcessInstance {
     private final CaseInsensitiveMap<ITask> taskMap = new CaseInsensitiveMap<>();
     private final CaseInsensitiveMap<IGateway> gatewayMap = new CaseInsensitiveMap<>();
-    private final CaseInsensitiveMap<IEvaluator> evaluatorMap = new CaseInsensitiveMap<>();
     private final ProcessDefinition processDefinition;
 
-    private ProcessInstance(String content) {
-        taskMap.put(ProcessConstant.USER_TASK, new UserTask(evaluatorMap));
-        taskMap.put(ProcessConstant.START, new StartTask(evaluatorMap));
+    private ProcessInstance(String content, IEvaluator evaluator) {
+        taskMap.put(ProcessConstant.USER_TASK, new UserTask(evaluator));
+        taskMap.put(ProcessConstant.START, new StartTask(evaluator));
         taskMap.put(ProcessConstant.END, new EndTask());
-        gatewayMap.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluatorMap));
-        gatewayMap.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluatorMap));
-        gatewayMap.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluatorMap));
-        evaluatorMap.put(ProcessConstant.DEFAULT_EVALUATOR, new JavaScriptEvaluator());
+        gatewayMap.put(ProcessConstant.EXCLUSIVE_GATEWAY, new ExclusiveGateway(evaluator));
+        gatewayMap.put(ProcessConstant.PARALLEL_END_GATEWAY, new ParallelEndGateway(evaluator));
+        gatewayMap.put(ProcessConstant.PARALLEL_START_GATEWAY, new ParallelStartGateway(evaluator));
         ProcessConfig config = YamlUtils.load(content, ProcessConfig.class);
         this.processDefinition = config.getProcessDefinition();
 
     }
 
-    public static ProcessInstance load(String content) {
-        return new ProcessInstance(content);
+    public static ProcessInstance load(String content, IEvaluator evaluator) {
+        return new ProcessInstance(content, DefaultEvaluator.build());
     }
 
-    public static ProcessInstance loadYaml(String classpathYamlFile) {
+    public static ProcessInstance loadYaml(String classpathYamlFile, IEvaluator evaluator) {
         String content = ClasspathFileUtils.readFileAsString(classpathYamlFile);
-        return load(content);
+        return load(content, evaluator);
     }
 
     /**

@@ -5,6 +5,7 @@ import com.damon.workflow.ComplexProcessResult;
 import com.damon.workflow.ProcessEngine;
 import com.damon.workflow.config.NextState;
 import com.damon.workflow.config.StateIdentifier;
+import com.damon.workflow.evaluator.DefaultEvaluator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,7 +16,7 @@ import java.util.Map;
 public class WorkflowComplexConditionParserTest {
     @Test
     public void test() {
-        ProcessEngine engine = new ProcessEngine();
+        ProcessEngine engine = new ProcessEngine.Builder().evaluator(DefaultEvaluator.build()).build();
         ComplexProcessResult result = engine.process("WorkflowComplexConditionParser:1.0", new HashMap<>(), "1");
         System.out.println("----------------");
         for (NextState nextState : result.getNextStates()) {

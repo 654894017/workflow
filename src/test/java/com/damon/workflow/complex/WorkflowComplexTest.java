@@ -3,7 +3,8 @@ package com.damon.workflow.complex;
 import com.damon.workflow.ProcessInstance;
 import com.damon.workflow.ProcessResult;
 import com.damon.workflow.config.State;
-import org.junit.Test;
+import com.damon.workflow.evaluator.DefaultEvaluator;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.Map;
 public class WorkflowComplexTest {
     @Test
     public void test() {
-        ProcessInstance engine = ProcessInstance.loadYaml("flow/WorkflowComplex.yaml");
+        ProcessInstance engine = ProcessInstance.loadYaml("flow/WorkflowComplex.yaml", DefaultEvaluator.build());
 
         ProcessResult result = engine.process(new HashMap<>());
         System.out.println("----------------");

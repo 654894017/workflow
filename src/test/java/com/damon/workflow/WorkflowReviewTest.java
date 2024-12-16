@@ -1,7 +1,8 @@
 package com.damon.workflow;
 
 import com.damon.workflow.config.State;
-import org.junit.Test;
+import com.damon.workflow.evaluator.DefaultEvaluator;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +11,7 @@ import java.util.Map;
 public class WorkflowReviewTest {
     @Test
     public void test() {
-        ProcessInstance engine = ProcessInstance.loadYaml("flow/WorkflowReview.yaml");
+        ProcessInstance engine = ProcessInstance.loadYaml("flow/WorkflowReview.yaml", DefaultEvaluator.build("groovy"));
         HashMap params1 = new HashMap<>();
         params1.put("a", 20);
         ProcessResult result = engine.process(params1);

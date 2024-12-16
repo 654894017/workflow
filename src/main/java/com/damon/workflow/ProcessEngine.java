@@ -1,11 +1,14 @@
 package com.damon.workflow;
 
+import com.damon.workflow.condition_parser.IProcessRollback;
 import com.damon.workflow.config.NextState;
 import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.config.StateIdentifier;
+import com.damon.workflow.evaluator.DefaultEvaluator;
+import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
-import com.damon.workflow.utils.classpath.ClasspathFileUtils;
+import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.classpath.ClasspathFlowFileLoader;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,33 +16,53 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class ProcessEngine {
 
     private Map<String, ProcessInstance> instanceMap = new ConcurrentHashMap<>();
+    private IEvaluator evaluator;
+    private List<String> flowYamlFiles;
+    private IProcessRollback processRollback;
 
-    public ProcessEngine() {
+    private ProcessEngine(Builder builder) {
+        this.evaluator = builder.evaluator;
+        this.flowYamlFiles = builder.flowYamlFiles;
+        this.processRollback = builder.processRollback;
         ClasspathFlowFileLoader loader = new ClasspathFlowFileLoader();
         List<String> flows = loader.loadFilesFromFlowFolder();
+        if (CollUtils.isNotEmpty(flowYamlFiles)) {
+            flowYamlFiles.forEach(flowYamlFile -> {
+                String processIdentifier = registerProcessInstance(ProcessInstance.loadYaml(
+                        flowYamlFile, this.evaluator == null ? DefaultEvaluator.build() : builder.evaluator)
+                );
+                log.info("register process: [{}] succeeded", processIdentifier);
+            });
+        }
         flows.forEach(content -> {
-            String processIdentifier = registerProcessInstance(ProcessInstance.load(content));
+            String processIdentifier = registerProcessInstance(ProcessInstance.load(
+                    content, this.evaluator == null ? DefaultEvaluator.build() : builder.evaluator)
+            );
             log.info("register process: [{}] succeeded", processIdentifier);
         });
     }
 
-    public String registerProcessInstance(String classpathYamlFile) {
-        String content = ClasspathFileUtils.readFileAsString(classpathYamlFile);
-        return registerProcessInstance(ProcessInstance.load(content));
-    }
-
-    public String registerProcessInstance(ProcessInstance instance) {
+    private String registerProcessInstance(ProcessInstance instance) {
         String identifier = instance.getProcessDefinition().getIdentifier();
         if (instanceMap.containsKey(instance.getProcessDefinition().getIdentifier())) {
             throw new ProcessException("流程定义ID重复定义，请检查配置文件，processId: " + identifier);
         }
         instanceMap.put(identifier, instance);
         return identifier;
+    }
+
+    public ComplexProcessResult rollback(StateIdentifier currentStateIdentifier, String businessId) {
+        if (processRollback == null) {
+            throw new ProcessException("流程回退功能未配置");
+        }
+        return processRollback.rollback(currentStateIdentifier, businessId);
     }
 
     /**
@@ -52,6 +75,7 @@ public class ProcessEngine {
     public ComplexProcessResult process(String processIdentifier, Map<String, Object> variables) {
         return process(processIdentifier, variables, null);
     }
+
 
     /**
      * 开启流程
@@ -140,7 +164,6 @@ public class ProcessEngine {
     /**
      * 获取流程步骤的描述信息
      *
-     *
      * @param identifier
      * @param stateId
      * @return
@@ -153,6 +176,31 @@ public class ProcessEngine {
     private ProcessResult process(String identifier, String currentStateId, Map<String, Object> variables, String businessId) {
         ProcessInstance instance = getProcessInstance(identifier);
         return instance.process(currentStateId, variables);
+    }
+
+    public static class Builder {
+        private IEvaluator evaluator;
+        private List<String> flowYamlFiles;
+        private IProcessRollback processRollback;
+
+        public Builder evaluator(IEvaluator evaluator) {
+            this.evaluator = evaluator;
+            return this;
+        }
+
+        public Builder processRollback(IProcessRollback processRollback) {
+            this.processRollback = processRollback;
+            return this;
+        }
+
+        public Builder flowYamlFiles(String... flowYamlFiles) {
+            this.flowYamlFiles = Stream.of(flowYamlFiles).collect(Collectors.toList());
+            return this;
+        }
+
+        public ProcessEngine build() {
+            return new ProcessEngine(this);
+        }
     }
 
 }

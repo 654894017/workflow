@@ -10,7 +10,7 @@ import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.spring.ApplicationContextHelper;
-import com.damon.workflow.utils.CaseInsensitiveMap;
+import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.StrUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,15 +22,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserTask implements ITask {
 
-    private final CaseInsensitiveMap<IEvaluator> evaluatorMap;
+    private final IEvaluator evaluator;
 
     @Override
     public List<State> execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
         State currentState = context.getCurrentState();
-        if (StrUtils.isNotEmpty(currentState.getProcessor())) {
-            // 执行当前状态处理逻辑
-            processCurrentState(currentState.getProcessor(), context);
+        if (CollUtils.isNotEmpty(currentState.getProcessors())) {
+            currentState.getProcessors().forEach(processorClassName ->
+                    // 执行当前状态处理逻辑
+                    processCurrentState(processorClassName, context)
+            );
         }
 
         // 条件解析，判断下一状态
@@ -52,7 +54,7 @@ public class UserTask implements ITask {
      */
     private void processCurrentState(String processorClassName, RuntimeContext context) {
         IProcessor processor = ApplicationContextHelper.getBean(processorClassName);
-        if (processor != null) {
+        if (processor != null && processor.isMatch(context.getCurrentState(), context.getVariables())) {
             processor.process(context);
         }
     }
@@ -98,11 +100,10 @@ public class UserTask implements ITask {
             String scriptType = StrUtils.isEmpty(currentState.getNextStateConditionScriptType())
                     ? ProcessConstant.DEFAULT_EVALUATOR
                     : currentState.getNextStateConditionScriptType();
-            IEvaluator evaluator = evaluatorMap.get(scriptType);
             if (evaluator == null) {
                 throw new ProcessException("未找到脚本执行器: " + scriptType);
             }
-            return evaluator.evaluate(currentState.getNextStateCondition(), context);
+            return evaluator.evaluate(currentState.getNextStateCondition(), scriptType, context);
         }
 
         // 默认条件

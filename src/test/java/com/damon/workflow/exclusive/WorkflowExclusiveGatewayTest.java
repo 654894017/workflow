@@ -3,6 +3,7 @@ package com.damon.workflow.exclusive;
 import com.damon.workflow.Application;
 import com.damon.workflow.ProcessInstance;
 import com.damon.workflow.ProcessResult;
+import com.damon.workflow.evaluator.DefaultEvaluator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -13,7 +14,7 @@ import java.util.Map;
 public class WorkflowExclusiveGatewayTest {
     @Test
     public void test() {
-        ProcessInstance engine = ProcessInstance.loadYaml("flow/WorkflowExclusiveGateway.yaml");
+        ProcessInstance engine = ProcessInstance.loadYaml("flow/WorkflowExclusiveGateway.yaml", DefaultEvaluator.build());
         Map<String, Object> params = new HashMap<>();
         params.put("employeePerformance", 85);
 

@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class WorkflowSubProcessTest {
     @Test
     public void test() {
-        ProcessEngine engine = new ProcessEngine();
+        ProcessEngine engine = new ProcessEngine.Builder().build();
         ComplexProcessResult result = engine.process("WorkflowMain:1.0", new HashMap<>());
 
         result.getNextStates().forEach(state -> {

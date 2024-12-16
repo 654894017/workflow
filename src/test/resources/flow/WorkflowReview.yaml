@@ -28,10 +28,10 @@ processDefinition:
       conditions:
         - condition: "a<85"
           nextStateId: "UserTask4"
-          scriptType: "JavaScript"
+          scriptType: "Groovy"
         - condition: "a>85"
           nextStateId: "End"
-          scriptType: "JavaScript"
+          scriptType: "Groovy"
 
 
     - id: "UserTask3"

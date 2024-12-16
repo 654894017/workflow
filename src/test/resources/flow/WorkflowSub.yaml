@@ -5,12 +5,16 @@ processDefinition:
   states:
     - id: "Start"
       type: "Start"
-      processor: "com.damon.workflow.sub.StartProcessor3"
+      processors:
+        - com.damon.workflow.sub.StartProcessor5
+      #  - com.damon.workflow.sub.StartProcessor3
       nextStateId: "aaa"
 
     - id: "aaa"
       type: "UserTask"
-      processor: "com.damon.workflow.sub.StartProcessor4"
+      processors:
+        - com.damon.workflow.sub.StartProcessor4
+        - com.damon.workflow.sub.StartProcessor4
       nextStateId: "End"
 
     - id: "End"

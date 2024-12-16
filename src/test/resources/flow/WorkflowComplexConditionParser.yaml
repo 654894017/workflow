@@ -6,7 +6,8 @@ processDefinition:
     - id: "Start"
       type: "UserTask"
       nextStateId: "UserTask1"
-      processor: "com.damon.workflow.complex.processor.StartProcessor"
+      processors:
+        - com.damon.workflow.complex.processor.StartProcessor
       extendParams:
         assigneeRole: "Manager"
         assigneeUser: "181987"
@@ -16,7 +17,8 @@ processDefinition:
           - submit
     - id: "UserTask1"
       type: "UserTask"
-      processor: "com.damon.workflow.complex.processor.UserTask1Processor"
+      processors:
+        - "com.damon.workflow.complex.processor.UserTask1Processor"
       nextStateId: "ReviewGateway"
       extendParams:
         assigneeRole: "Manager"

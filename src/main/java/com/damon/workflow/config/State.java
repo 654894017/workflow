@@ -18,7 +18,7 @@ public class State {
     private String type;
     private String name;
     private String nextStateId;
-    private String processor;
+    private List<String> processors;
     private Map<String, Object> extendParams;
     private List<Condition> conditions;
     private String nextStateCondition;
