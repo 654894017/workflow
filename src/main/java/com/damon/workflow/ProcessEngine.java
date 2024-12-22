@@ -175,7 +175,7 @@ public class ProcessEngine {
 
     private ProcessResult process(String identifier, String currentStateId, Map<String, Object> variables, String businessId) {
         ProcessInstance instance = getProcessInstance(identifier);
-        return instance.process(currentStateId, variables);
+        return instance.process(currentStateId, variables, businessId);
     }
 
     public static class Builder {
