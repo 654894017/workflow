@@ -11,7 +11,7 @@ processDefinition:
       nextStateId: "aaa"
 
     - id: "aaa"
-      type: "UserTask"
+      type: "GeneralTask"
       processors:
         - com.damon.workflow.sub.StartProcessor4
         - com.damon.workflow.sub.StartProcessor4

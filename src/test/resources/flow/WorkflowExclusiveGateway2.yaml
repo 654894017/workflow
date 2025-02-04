@@ -17,7 +17,7 @@ processDefinition:
           - submit
 
     - id: "StandardReview"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "End"
       extendParams:
         assigneeRole: "Manager"

@@ -20,7 +20,7 @@ public class DefaultEvaluator implements IEvaluator {
     }
 
     public static DefaultEvaluator build(String... scriptTypeNames) {
-        engines.put("JavaScript", new ScriptEngineManager().getEngineByName("JavaScript"));
+        engines.put("JavaScript", new ScriptEngineManager().getEngineByName("graal.js"));
         for (String scriptTypeName : scriptTypeNames) {
             engines.put(scriptTypeName, new ScriptEngineManager().getEngineByName(scriptTypeName));
         }

@@ -1,8 +1,8 @@
 package com.damon.workflow.spring;
 
 import com.damon.workflow.condition_parser.IConditionParser;
-import com.damon.workflow.condition_parser.IProcessor;
 import com.damon.workflow.exception.ProcessException;
+import com.damon.workflow.process.IProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;

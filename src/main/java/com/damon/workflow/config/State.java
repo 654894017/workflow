@@ -25,13 +25,14 @@ public class State {
     private String nextStateConditionScriptType;
     private String nextStateConditionParser;
     private String subProcessIdentifier;
+    private boolean endState;
 
     public boolean isSubProcessState() {
         return ProcessConstant.SUB_PROCESS.equals(type);
     }
 
     public boolean isTaskState() {
-        return Stream.of(START, USER_TASK, END).collect(Collectors.toSet()).contains(type);
+        return Stream.of(START, GENERAL_TASK, END).collect(Collectors.toSet()).contains(type);
     }
 
     public boolean isExclusiveGatewayState() {
@@ -44,6 +45,10 @@ public class State {
 
     public boolean isParallelEndGatewayState() {
         return PARALLEL_END_GATEWAY.equals(type);
+    }
+
+    public boolean isEndState() {
+        return endState;
     }
 
 }

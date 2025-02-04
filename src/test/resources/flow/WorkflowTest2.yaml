@@ -1,0 +1,54 @@
+processDefinition:
+  id: "WorkflowTest2"
+  version: "1.0"
+  startStateId: "Start"
+  states:
+    - id: "Start"
+      type: "Start"
+      processors:
+        - com.damon.workflow.complex.processor.UserTask11Processor
+
+      nextStateId: "StandardReview1"
+
+    - id: "StandardReview1"
+      type: "GeneralTask"
+      processors:
+        - com.damon.workflow.complex.processor.UserTask11Processor
+      nextStateId: "ParallelStartGateway"
+
+    - id: "ParallelStartGateway"
+      type: "ParallelStartGateway"
+      conditions:
+        - nextStateConditionParser: com.damon.workflow.complex.parser.StandardReviewConditionParser2
+          nextStateId: "StandardReview4"
+        - nextStateConditionParser: com.damon.workflow.complex.parser.StandardReviewConditionParser2
+          nextStateId: "StandardReview5"
+
+    - id: "StandardReview4"
+      type: "GeneralTask"
+      processors:
+        - com.damon.workflow.complex.processor.UserTask11Processor
+      nextStateId: "ParallelEndGateway"
+
+    - id: "StandardReview5"
+      type: "GeneralTask"
+      processors:
+        - com.damon.workflow.complex.processor.UserTask11Processor
+      nextStateId: "ParallelEndGateway"
+
+    - id: "ParallelEndGateway"
+      type: "ParallelEndGateway"
+      nextStateConditionParser: com.damon.workflow.complex.parser.StandardReviewConditionParser2
+      nextStateId: "StandardReview6"
+
+    - id: "StandardReview6"
+      type: "GeneralTask"
+      processors:
+        - com.damon.workflow.complex.processor.UserTask11Processor
+      nextStateId: "End"
+
+    - id: "End"
+      type: "End"
+      processors:
+        - com.damon.workflow.complex.processor.UserTask11Processor
+      nextStateId: null

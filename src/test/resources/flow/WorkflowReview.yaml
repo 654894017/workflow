@@ -4,7 +4,7 @@ processDefinition:
   startStateId: "Start"
   states:
     - id: "Start"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "ReviewGateway"
       extendParams:
         assigneeRole: "Manager"
@@ -35,7 +35,7 @@ processDefinition:
 
 
     - id: "UserTask3"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "End"
       extendParams:
         assigneeRole: "Manager"
@@ -46,7 +46,7 @@ processDefinition:
           - submit
 
     - id: "UserTask4"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "End"
       extendParams:
         assigneeRole: "Manager"

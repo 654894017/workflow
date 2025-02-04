@@ -4,7 +4,7 @@ processDefinition:
   startStateId: "Start"
   states:
     - id: "Start"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "UserTask1"
       extendParams:
         assigneeRole: "Manager"
@@ -14,7 +14,7 @@ processDefinition:
         actions:
           - submit
     - id: "UserTask1"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "ReviewGateway"
       extendParams:
         assigneeRole: "Manager"
@@ -33,7 +33,7 @@ processDefinition:
           nextStateId: "StandardReview"
 
     - id: "HighPerformanceReview"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "UserTask2"
       extendParams:
         assigneeRole: "Manager"
@@ -46,7 +46,7 @@ processDefinition:
           - reject
 
     - id: "StandardReview"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "UserTask2"
       extendParams:
         assigneeRole: "Manager"
@@ -57,7 +57,7 @@ processDefinition:
           - reject
 
     - id: "UserTask2"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "ParallelStartGateway"
       extendParams:
         assigneeRole: "Manager"
@@ -77,7 +77,7 @@ processDefinition:
           nextStateId: "UserTask4"
 
     - id: "UserTask3"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "ParallelEndGateway"
       extendParams:
         assigneeRole: "Manager"
@@ -88,7 +88,7 @@ processDefinition:
           - submit
 
     - id: "UserTask4"
-      type: "UserTask"
+      type: "GeneralTask"
       nextStateId: "ParallelEndGateway"
       extendParams:
         assigneeRole: "Manager"

@@ -24,7 +24,7 @@ processDefinition:
 
 
     - id: "StandardReview"
-      type: "UserTask"
+      type: "GeneralTask"
       processors:
         - com.damon.workflow.sub.StartProcessor2
       nextStateId: "End"

@@ -13,7 +13,7 @@ public class YamlUtils {
         try {
             return mapper.readValue(content, clazz);
         } catch (JsonProcessingException e) {
-            throw new ProcessException("加载流程实例配置异常", e);
+            throw new ProcessException("加载流程实例配置异常:" + content, e);
         }
     }
 

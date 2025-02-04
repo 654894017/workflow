@@ -5,7 +5,7 @@ public class ProcessConstant {
 
     public static final String START = "Start";
 
-    public static final String USER_TASK = "UserTask";
+    public static final String GENERAL_TASK = "GeneralTask";
 
     public static final String END = "End";
 
@@ -18,4 +18,8 @@ public class ProcessConstant {
     public static final String DEFAULT_EVALUATOR = "JavaScript";
 
     public static final String STATE_PROCESS_RESULT = "state_process_result";
+
+    public static final String STATES_PROCESS_RESULT = "states_process_result";
+
+    public static final String STATES_PROCESS_FAILED = "states_process_failed";
 }

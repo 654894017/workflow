@@ -5,7 +5,7 @@ import com.damon.workflow.evaluator.IEvaluator;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class StartTask extends UserTask {
+public class StartTask extends GeneralTask {
 
     public StartTask(IEvaluator evaluator) {
         super(evaluator);
