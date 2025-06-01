@@ -5,7 +5,7 @@ import com.damon.workflow.ComplexProcessResult;
 import com.damon.workflow.ProcessInstance;
 import com.damon.workflow.config.NextState;
 import com.damon.workflow.config.StateIdentifier;
-import com.damon.workflow.engine.LongTransactionProcessEngine;
+import com.damon.workflow.engine.ProcessEngine;
 import com.damon.workflow.evaluator.DefaultEvaluator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class WorkflowComplexConditionParserTest {
     @Test
     public void test() {
-        LongTransactionProcessEngine engine = new LongTransactionProcessEngine.Builder().evaluator(DefaultEvaluator.build()).build();
+        ProcessEngine engine = new ProcessEngine.Builder().evaluator(DefaultEvaluator.build()).build();
         ProcessInstance instance = engine.getProcessInstance("WorkflowComplexConditionParser:1.0");
         System.out.println(instance.getProcessDefinition().getStateInverseRelation());
         ComplexProcessResult result = engine.process("WorkflowComplexConditionParser:1.0", new HashMap<>(), "1");

@@ -99,13 +99,13 @@ public class ProcessInstance {
                 StateIdentifier.buildFromIdentifiers(processDefinition.getIdentifier(), currentStateId),
                 variables, businessId
         );
-        List<State> taskNextStates = new ArrayList<>();
-        ITask task = taskMap.get(currentState.getType());
-        if (task == null) {
-            //子流程调用的时候可能传入非任务节点,那么需要找到这个非任务节点的下一个节点
-            taskNextStates.addAll(findNextStates(processDefinition, currentState, context));
+        List<State> taskNextStates;
+        if (!currentState.isTaskState()) {
+            //非任务节点,那么需要找到这个非任务节点的下一个节点
+            taskNextStates = findNextStates(processDefinition, currentState, context);
         } else {
-            taskNextStates.addAll(task.execute(context));
+            ITask task = taskMap.get(currentState.getType());
+            taskNextStates = task.execute(context);
         }
         // 后续节点处理
         List<State> nextStates = new ArrayList<>();
@@ -173,11 +173,6 @@ public class ProcessInstance {
         } else {
             if (currentState.isTaskState() || currentState.isSubProcessState()) {
                 result.add(currentState);
-            } else {
-                if (currentState.getNextStateId() != null) {
-                    State nextState = processDefinition.getState(currentState.getNextStateId());
-                    findNextStatesRecursive(processDefinition, nextState, context, result);
-                }
             }
         }
     }

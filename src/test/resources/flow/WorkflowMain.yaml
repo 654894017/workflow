@@ -5,8 +5,8 @@ processDefinition:
   states:
     - id: "Start"
       type: "Start"
-      processors:
-        - com.damon.workflow.sub.StartProcessor1
+      handlers:
+        - com.damon.workflow.sub.StartProcessStateHandler1
       nextStateId: "SubProcess1"
 
     - id: "SubProcess1"
@@ -25,8 +25,8 @@ processDefinition:
 
     - id: "StandardReview"
       type: "GeneralTask"
-      processors:
-        - com.damon.workflow.sub.StartProcessor2
+      handlers:
+        - com.damon.workflow.sub.StartProcessStateHandler2
       nextStateId: "End"
 
     - id: "End"

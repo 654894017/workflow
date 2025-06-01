@@ -5,15 +5,15 @@ processDefinition:
   states:
     - id: "Start"
       type: "Start"
-      processors:
-        - com.damon.workflow.complex.processor.UserTask11Processor
+      handlers:
+        - com.damon.workflow.complex.processor.UserTask11StateHandler
 
       nextStateId: "StandardReview1"
 
     - id: "StandardReview1"
       type: "GeneralTask"
-      processors:
-        - com.damon.workflow.complex.processor.UserTask11Processor
+      handlers:
+        - com.damon.workflow.complex.processor.UserTask11StateHandler
       nextStateId: "ParallelStartGateway"
 
     - id: "ParallelStartGateway"
@@ -26,14 +26,14 @@ processDefinition:
 
     - id: "StandardReview4"
       type: "GeneralTask"
-      processors:
-        - com.damon.workflow.complex.processor.UserTask11Processor
+      handlers:
+        - com.damon.workflow.complex.processor.UserTask11StateHandler
       nextStateId: "ParallelEndGateway"
 
     - id: "StandardReview5"
       type: "GeneralTask"
-      processors:
-        - com.damon.workflow.complex.processor.UserTask11Processor
+      handlers:
+        - com.damon.workflow.complex.processor.UserTask11StateHandler
       nextStateId: "ParallelEndGateway"
 
     - id: "ParallelEndGateway"
@@ -43,12 +43,12 @@ processDefinition:
 
     - id: "StandardReview6"
       type: "GeneralTask"
-      processors:
-        - com.damon.workflow.complex.processor.UserTask11Processor
+      handlers:
+        - com.damon.workflow.complex.processor.UserTask11StateHandler
       nextStateId: "End"
 
     - id: "End"
       type: "End"
-      processors:
-        - com.damon.workflow.complex.processor.UserTask11Processor
+      handlers:
+        - com.damon.workflow.complex.processor.UserTask11StateHandler
       nextStateId: null

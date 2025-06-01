@@ -13,10 +13,6 @@ processDefinition:
       extendParams:
         allowEditingResouces:
           - resource: work_goal
-            validator: com.abc
-          - work_goal
-          - self_evaluation_score
-          - self_summary
 
     - id: "StandardReview2"
       type: "GeneralTask"

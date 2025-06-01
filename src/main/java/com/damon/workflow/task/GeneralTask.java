@@ -9,7 +9,7 @@ import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.exception.ProcessTaskException;
-import com.damon.workflow.process.IProcessor;
+import com.damon.workflow.handler.IProcessStateHandler;
 import com.damon.workflow.spring.ApplicationContextHelper;
 import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.StrUtils;
@@ -30,8 +30,8 @@ public class GeneralTask implements ITask {
     public List<State> execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
         State currentState = processDefinition.getState(context.getCurrentStateIdentifier().getCurrentStateId());
-        if (CollUtils.isNotEmpty(currentState.getProcessors())) {
-            currentState.getProcessors().forEach(processorClassName ->
+        if (CollUtils.isNotEmpty(currentState.getHandlers())) {
+            currentState.getHandlers().forEach(processorClassName ->
                     // 执行当前状态处理逻辑
                     processCurrentState(processorClassName, context)
             );
@@ -55,13 +55,13 @@ public class GeneralTask implements ITask {
      * 处理当前状态逻辑
      */
     private void processCurrentState(String processorClassName, RuntimeContext context) {
-        IProcessor processor = ApplicationContextHelper.getBean(processorClassName);
-        if (processor != null && processor.isMatch(context)) {
+        IProcessStateHandler handler = ApplicationContextHelper.getBean(processorClassName);
+        if (handler != null && handler.isMatch(context)) {
             try {
-                processor.process(context);
+                handler.handle(context);
                 Map<String, Object> variables = context.getVariables();
-                context.setStateProcessResult(variables.get(ProcessConstant.STATE_PROCESS_RESULT));
-            } catch (Throwable e) {
+                context.setResult(variables.get(ProcessConstant.STATE_PROCESS_RESULT));
+            } catch (Exception e) {
                 log.error("流程ID: {}, 当前状态: {} 处理失败", context.getProcessDefinition().getIdentifier(),
                         context.getCurrentStateIdentifier().getFullPaths(), e);
                 throw new ProcessTaskException(context.getCurrentStateIdentifier(), e);

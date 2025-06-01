@@ -1,13 +1,13 @@
 package com.damon.workflow.complex.processor;
 
 import com.damon.workflow.RuntimeContext;
-import com.damon.workflow.process.IProcessor;
+import com.damon.workflow.handler.IProcessStateHandler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class HighPerformanceReviewProcessor implements IProcessor {
+public class StartStateHandler implements IProcessStateHandler {
     @Override
-    public void process(RuntimeContext context) {
+    public void handle(RuntimeContext context) {
         System.out.println(context.getCurrentStateIdentifier().getFullPaths() + ":" + context.getVariables());
     }
 

@@ -3,11 +3,9 @@ package com.damon.workflow;
 
 import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.StateIdentifier;
-import lombok.Getter;
 
-import java.util.*;
+import java.util.Map;
 
-@Getter
 public class RuntimeContext {
     private final ProcessDefinition processDefinition;
     private final StateIdentifier currentStateIdentifier;
@@ -25,22 +23,19 @@ public class RuntimeContext {
         return variables;
     }
 
-    public <T> T getStateProcessResult() {
-        Map<String, Object> statesProcessResult = (Map<String, Object>) variables.get(ProcessConstant.STATES_PROCESS_RESULT);
-        return (T) statesProcessResult.get(currentStateIdentifier.getFullPaths());
+    public void setResult(Object result) {
+        variables.put(currentStateIdentifier.getFullPaths(), result);
     }
 
-    public synchronized void setStateProcessResult(Object result) {
-        Map<String, Object> statesProcessResult = (Map<String, Object>) variables.computeIfAbsent(ProcessConstant.STATES_PROCESS_RESULT,
-                key -> Collections.synchronizedMap(new HashMap<>())
-        );
-        statesProcessResult.put(currentStateIdentifier.getFullPaths(), result);
+    public ProcessDefinition getProcessDefinition() {
+        return processDefinition;
     }
 
-    public synchronized void setStateProcessFailed() {
-        List<StateIdentifier> exceptions = (List<StateIdentifier>) variables.computeIfAbsent(ProcessConstant.STATES_PROCESS_FAILED,
-                key -> Collections.synchronizedList(new ArrayList<>())
-        );
-        exceptions.add(currentStateIdentifier);
+    public StateIdentifier getCurrentStateIdentifier() {
+        return currentStateIdentifier;
+    }
+
+    public String getBusinessId() {
+        return businessId;
     }
 }

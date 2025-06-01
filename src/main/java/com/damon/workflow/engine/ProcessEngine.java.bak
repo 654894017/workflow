@@ -8,19 +8,19 @@ import com.damon.workflow.config.StateIdentifier;
 import com.damon.workflow.evaluator.DefaultEvaluator;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
-import com.damon.workflow.handler.IProcessRejectionHandler;
-import com.damon.workflow.handler.IProcessStateHandler;
-import com.damon.workflow.handler.IProcessWithdrawHandler;
+import com.damon.workflow.process.IProcessor;
 import com.damon.workflow.spring.ApplicationContextHelper;
 import com.damon.workflow.utils.CollUtils;
-import com.damon.workflow.utils.Lists;
 import com.damon.workflow.utils.classpath.ClasspathFlowFileLoader;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,15 +35,12 @@ public class ProcessEngine {
     private Map<String, ProcessInstance> instanceMap = new ConcurrentHashMap<>();
     private IEvaluator evaluator;
     private List<String> flowYamlFiles;
-
-    private IProcessRejectionHandler processRejectionHandler;
-    private IProcessWithdrawHandler processWithdrawHandler;
+    private ExecutorService executorService;
 
     protected ProcessEngine(Builder builder) {
         this.evaluator = builder.evaluator;
         this.flowYamlFiles = builder.flowYamlFiles;
-        this.processRejectionHandler = builder.rejectionHandler;
-        this.processWithdrawHandler = builder.withdrawHandler;
+        this.executorService = builder.executorService;
         ClasspathFlowFileLoader loader = new ClasspathFlowFileLoader();
         List<String> flows = loader.loadFilesFromFlowFolder();
         if (CollUtils.isNotEmpty(flowYamlFiles)) {
@@ -71,37 +68,46 @@ public class ProcessEngine {
         return identifier;
     }
 
-    /**
-     * 撤回
-     *
-     * @return
-     */
-    public StateIdentifier callBack(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
-        if (this.processWithdrawHandler == null) {
-            throw new ProcessException("流程撤回功能未配置");
-        }
-        State state = this.getState(currentStateIdentifier.getCurrentStateProcessIdentifier(), currentStateIdentifier.getCurrentStateId());
-        ProcessInstance instance = this.getProcessInstance(currentStateIdentifier.getCurrentStateProcessIdentifier());
-        RuntimeContext context = new RuntimeContext(instance.getProcessDefinition(), currentStateIdentifier, variables, businessId);
-        return this.processWithdrawHandler.withdraw(context);
+    public ComplexProcessResult trigger(String processIdentifier, Map<String, Object> variables) {
+        return this.trigger(processIdentifier, variables, null);
     }
 
     /**
-     * 驳回
+     * 触发实时流程
      *
-     * @param currentStateIdentifier
-     * @param businessId
+     * @param processIdentifier
+     * @param variables
      * @return
      */
-    public List<StateIdentifier> rollback(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
-        if (this.processRejectionHandler == null) {
-            throw new ProcessException("流程回退功能未配置");
+    public ComplexProcessResult trigger(String processIdentifier, Map<String, Object> variables, String businessId) {
+        ComplexProcessResult result = process(processIdentifier, variables, businessId);
+        boolean isCompleted = result.isCompleted();
+        Stack<ComplexProcessResult> resultStack = new Stack<>();
+        resultStack.push(result);
+        while (!resultStack.isEmpty() && !isCompleted) {
+            List<NextState> nextStates = resultStack.pop().getNextStates();
+            if (nextStates.size() == 1) {
+                StateIdentifier stateIdentifier = StateIdentifier.buildFromFullPaths(nextStates.get(0).getNextStateFullPaths());
+                ComplexProcessResult processResult = process(stateIdentifier, variables, businessId);
+                resultStack.push(processResult);
+                isCompleted = processResult.isCompleted();
+            } else {
+                List<CompletableFuture<ComplexProcessResult>> resultFutures = nextStates.stream().map(nextState -> {
+                    return CompletableFuture.supplyAsync(
+                            () -> process(StateIdentifier.buildFromFullPaths(nextState.getNextStateFullPaths()), variables),
+                            executorService
+                    );
+                }).collect(Collectors.toList());
+                for (CompletableFuture<ComplexProcessResult> resultFuture : resultFutures) {
+                    ComplexProcessResult processResult = resultFuture.join();
+                    if (!processResult.isCompleted()) {
+                        resultStack.push(processResult);
+                    }
+                }
+            }
         }
-        State state = this.getState(currentStateIdentifier.getCurrentStateProcessIdentifier(), currentStateIdentifier.getCurrentStateId());
-        List<String> classProcessors = state.getHandlers();
-        ProcessInstance instance = this.getProcessInstance(currentStateIdentifier.getCurrentStateProcessIdentifier());
-        RuntimeContext context = new RuntimeContext(instance.getProcessDefinition(), currentStateIdentifier, variables, businessId);
-        return this.processRejectionHandler.reject(context);
+        result.setStatesProcessResult((Map<String, Object>) variables.get(ProcessConstant.STATES_PROCESS_RESULT));
+        return result;
     }
 
 
@@ -112,7 +118,7 @@ public class ProcessEngine {
      * @param variables
      * @return
      */
-    public ComplexProcessResult process(String processIdentifier, Map<String, Object> variables) {
+    protected ComplexProcessResult process(String processIdentifier, Map<String, Object> variables) {
         return process(processIdentifier, variables, null);
     }
 
@@ -125,7 +131,7 @@ public class ProcessEngine {
      * @param businessId
      * @return
      */
-    public ComplexProcessResult process(String processIdentifier, Map<String, Object> variables, String businessId) {
+    protected ComplexProcessResult process(String processIdentifier, Map<String, Object> variables, String businessId) {
         ProcessInstance instance = getProcessInstance(processIdentifier);
         ProcessDefinition processDefinition = instance.getProcessDefinition();
         return process(StateIdentifier.buildFromIdentifiers(processIdentifier, processDefinition.getStartStateId()), variables, businessId);
@@ -136,7 +142,7 @@ public class ProcessEngine {
      * @param variables
      * @return
      */
-    public ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables) {
+    protected ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables) {
         return process(currentStateIdentifier, variables, null);
     }
 
@@ -146,43 +152,38 @@ public class ProcessEngine {
      * @param businessId
      * @return
      */
-    public ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
+    protected ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
         ComplexProcessResult result = doProcess(currentStateIdentifier, variables, businessId);
         result.setCurrentStateIdentifier(currentStateIdentifier);
-        result.setResult(variables.get(ProcessConstant.STATE_PROCESS_RESULT));
+        result.setStateProcessResult(variables.get(ProcessConstant.STATE_PROCESS_RESULT));
+        State state = this.getState(currentStateIdentifier.getCurrentStateProcessIdentifier(), currentStateIdentifier.getCurrentStateId());
+        List<String> classProcessors = state.getProcessors();
+        ProcessInstance instance = this.getProcessInstance(currentStateIdentifier.getCurrentStateProcessIdentifier());
+        RuntimeContext context = new RuntimeContext(instance.getProcessDefinition(), currentStateIdentifier, variables, businessId);
+        if (CollUtils.isNotEmpty(classProcessors)) {
+            classProcessors.forEach(classProcessor -> {
+                IProcessor processor = ApplicationContextHelper.getBean(classProcessor);
+                if (processor.isMatch(context)) {
+                    processor.postProcess(result, context);
+                }
+            });
+        }
         return result;
     }
 
     private ComplexProcessResult doProcess(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
-        ProcessInstance instance = getProcessInstance(
-                currentStateIdentifier.getCurrentStateProcessIdentifier()
-        );
-        ProcessResult result = instance.process(
-                currentStateIdentifier.getCurrentStateId(),
-                variables,
-                businessId
-        );
+        ProcessInstance instance = getProcessInstance(currentStateIdentifier.getCurrentStateProcessIdentifier());
+        ProcessResult result = instance.process(currentStateIdentifier.getCurrentStateId(), variables, businessId);
         if (result.isCompleted() && currentStateIdentifier.isSubProcess()) {
-            //如果子流程执行完成，则找到这个父流程的的子流程节点，继续执行下一个节点任务
-            State subProcessState = getState(
-                    currentStateIdentifier.getParentProcessIdentifier(),
-                    currentStateIdentifier.getSubProcessStateId()
-            );
+            State subProcessState = getState(currentStateIdentifier.getParentProcessIdentifier(), currentStateIdentifier.getSubProcessStateId());
             return doProcess(
-                    StateIdentifier.buildFromFullPaths(
-                            currentStateIdentifier.getParentProcessFullPaths(),
-                            subProcessState.getNextStateId()
-                    ),
-                    variables,
-                    businessId
+                    StateIdentifier.buildFromFullPaths(currentStateIdentifier.getParentProcessFullPaths(), subProcessState.getNextStateId()),
+                    variables, businessId
             );
         }
         List<NextState> nextStates = new ArrayList<>();
         result.getNextStates().forEach(state -> {
-            StateIdentifier stateIdentifier = StateIdentifier.buildFromFullPaths(
-                    currentStateIdentifier.getFullPathsExcludingLast(),
-                    state.getId()
-            );
+            StateIdentifier stateIdentifier = StateIdentifier.buildFromFullPaths(currentStateIdentifier.getFullPathsExcludingLast(), state.getId());
             if (state.isSubProcessState()) {
                 nextStates.add(getSubProcessStartState(stateIdentifier, state));
             } else {
@@ -193,8 +194,6 @@ public class ProcessEngine {
     }
 
     /**
-     * 获取子流程开始节点
-     *
      * @param stateIdentifier
      * @param state
      * @return
@@ -202,16 +201,10 @@ public class ProcessEngine {
     private NextState getSubProcessStartState(StateIdentifier stateIdentifier, State state) {
         String subProcessIdentifier = state.getSubProcessIdentifier();
         ProcessInstance subProcessInstance = getProcessInstance(subProcessIdentifier);
-        //获取子流程ID
         String subProcessStartStateId = subProcessInstance.getProcessDefinition().getStartStateId();
-        //获取子流程开启节点
         State subProcessStartState = getState(subProcessIdentifier, subProcessStartStateId);
         return new NextState(
-                StateIdentifier.buildFromFullPaths(
-                        stateIdentifier.getFullPaths(),
-                        state.getSubProcessIdentifier(),
-                        subProcessStartStateId
-                ).getFullPaths(),
+                StateIdentifier.buildFromFullPaths(stateIdentifier.getFullPaths(), state.getSubProcessIdentifier(), subProcessStartStateId).getFullPaths(),
                 subProcessStartState
         );
     }
@@ -237,33 +230,24 @@ public class ProcessEngine {
     }
 
 
-    public static class Builder {
+    public static class Builder<T extends Builder<T>> {
+        protected ExecutorService executorService;
         protected IEvaluator evaluator;
         protected List<String> flowYamlFiles;
-        private IProcessRejectionHandler rejectionHandler;
-        private IProcessWithdrawHandler withdrawHandler;
 
-
-        public Builder evaluator(IEvaluator evaluator) {
+        public T evaluator(IEvaluator evaluator) {
             this.evaluator = evaluator;
-            return this;
+            return (T) this;
         }
 
+        public T executorService(ExecutorService executorService) {
+            this.executorService = executorService;
+            return (T) this;
+        }
 
-        public Builder flowYamlFiles(String... flowYamlFiles) {
+        public T flowYamlFiles(String... flowYamlFiles) {
             this.flowYamlFiles = Stream.of(flowYamlFiles).collect(Collectors.toList());
-            return this;
-        }
-
-
-        public Builder withdrawHandler(IProcessWithdrawHandler withdrawHandler) {
-            this.withdrawHandler = withdrawHandler;
-            return this;
-        }
-
-        public Builder rejectionHandler(IProcessRejectionHandler rejectionHandler) {
-            this.rejectionHandler = rejectionHandler;
-            return this;
+            return (T) this;
         }
 
         public ProcessEngine build() {

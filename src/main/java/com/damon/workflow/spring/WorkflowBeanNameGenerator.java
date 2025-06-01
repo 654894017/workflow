@@ -2,7 +2,7 @@ package com.damon.workflow.spring;
 
 import com.damon.workflow.condition_parser.IConditionParser;
 import com.damon.workflow.exception.ProcessException;
-import com.damon.workflow.process.IProcessor;
+import com.damon.workflow.handler.IProcessStateHandler;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
@@ -16,7 +16,7 @@ public class WorkflowBeanNameGenerator extends AnnotationBeanNameGenerator {
         } catch (ClassNotFoundException e) {
             throw new ProcessException(e);
         }
-        if (IProcessor.class.isAssignableFrom(beanClass) || IConditionParser.class.isAssignableFrom(beanClass)) {
+        if (IProcessStateHandler.class.isAssignableFrom(beanClass) || IConditionParser.class.isAssignableFrom(beanClass)) {
             return definition.getBeanClassName();
         }
         return super.buildDefaultBeanName(definition);
