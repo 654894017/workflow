@@ -1,0 +1,9 @@
+/target/test-classes/flow/WorkflowComplex.yaml
+/target/test-classes/flow/WorkflowComplexConditionParser.yaml
+/target/test-classes/flow/WorkflowExclusiveGateway.yaml
+/target/test-classes/flow/WorkflowExclusiveGateway2.yaml
+/target/test-classes/flow/WorkflowMain.yaml
+/target/test-classes/flow/WorkflowReview.yaml
+/target/test-classes/flow/WorkflowSub.yaml
+/target/test-classes/flow/WorkflowTest.yaml
+/target/test-classes/flow/WorkflowTest2.yaml

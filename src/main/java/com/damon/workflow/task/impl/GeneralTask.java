@@ -1,4 +1,4 @@
-package com.damon.workflow.task;
+package com.damon.workflow.task.impl;
 
 
 import com.damon.workflow.ProcessConstant;
@@ -11,6 +11,7 @@ import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.exception.ProcessTaskException;
 import com.damon.workflow.handler.IProcessStateHandler;
 import com.damon.workflow.spring.ApplicationContextHelper;
+import com.damon.workflow.task.ITask;
 import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.StrUtils;
 import lombok.RequiredArgsConstructor;

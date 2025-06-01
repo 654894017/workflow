@@ -19,7 +19,4 @@ public class ProcessConstant {
 
     public static final String STATE_PROCESS_RESULT = "state_process_result";
 
-    public static final String STATES_PROCESS_RESULT = "states_process_result";
-
-    public static final String STATES_PROCESS_FAILED = "states_process_failed";
 }

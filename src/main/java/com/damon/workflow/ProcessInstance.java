@@ -1,7 +1,10 @@
 package com.damon.workflow;
 
 
-import com.damon.workflow.config.*;
+import com.damon.workflow.config.ProcessConfig;
+import com.damon.workflow.config.ProcessDefinition;
+import com.damon.workflow.config.State;
+import com.damon.workflow.config.StateIdentifier;
 import com.damon.workflow.evaluator.DefaultEvaluator;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
@@ -9,10 +12,10 @@ import com.damon.workflow.gateway.ExclusiveGateway;
 import com.damon.workflow.gateway.IGateway;
 import com.damon.workflow.gateway.ParallelEndGateway;
 import com.damon.workflow.gateway.ParallelStartGateway;
-import com.damon.workflow.task.EndTask;
-import com.damon.workflow.task.GeneralTask;
 import com.damon.workflow.task.ITask;
-import com.damon.workflow.task.StartTask;
+import com.damon.workflow.task.impl.EndTask;
+import com.damon.workflow.task.impl.GeneralTask;
+import com.damon.workflow.task.impl.StartTask;
 import com.damon.workflow.utils.CaseInsensitiveMap;
 import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.YamlUtils;
@@ -21,7 +24,6 @@ import com.damon.workflow.utils.classpath.ClasspathFileUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ProcessInstance {
     private final CaseInsensitiveMap<ITask> taskMap = new CaseInsensitiveMap<>();
@@ -90,13 +92,16 @@ public class ProcessInstance {
      * @return
      */
     public ProcessResult process(String currentStateId, Map<String, Object> variables, String businessId) {
-
         State currentState = processDefinition.getState(currentStateId);
         if (currentState == null) {
             throw new ProcessException("无效的流程状态ID: " + currentStateId);
         }
-        RuntimeContext context = new RuntimeContext(processDefinition,
-                StateIdentifier.buildFromIdentifiers(processDefinition.getIdentifier(), currentStateId),
+        RuntimeContext context = new RuntimeContext(
+                processDefinition,
+                StateIdentifier.buildFromIdentifiers(
+                        processDefinition.getIdentifier(),
+                        currentStateId
+                ),
                 variables, businessId
         );
         List<State> taskNextStates;
@@ -129,8 +134,15 @@ public class ProcessInstance {
         if (isCompleted) {
             ITask endTask = taskMap.get(nextStates.get(0).getType());
             State state = nextStates.get(0);
-            StateIdentifier endStateIdentifier = StateIdentifier.buildFromIdentifiers(processDefinition.getIdentifier(), state.getId());
-            endTask.execute(new RuntimeContext(processDefinition, endStateIdentifier, variables, businessId));
+            StateIdentifier endStateIdentifier = StateIdentifier.buildFromIdentifiers(
+                    processDefinition.getIdentifier(), state.getId()
+            );
+            endTask.execute(new RuntimeContext(
+                    processDefinition,
+                    endStateIdentifier,
+                    variables,
+                    businessId
+            ));
         }
         return new ProcessResult(isCompleted, processDefinition.getIdentifier(), currentState, nextStates);
     }
@@ -150,7 +162,11 @@ public class ProcessInstance {
      * @param context           执行上下文，包括条件变量等
      * @return 后续所有待执行的节点集合
      */
-    private List<State> findNextStates(ProcessDefinition processDefinition, State currentState, RuntimeContext context) {
+    private List<State> findNextStates(
+            ProcessDefinition processDefinition,
+            State currentState,
+            RuntimeContext context
+    ) {
         List<State> nextStates = new ArrayList<>();
         findNextStatesRecursive(processDefinition, currentState, context, nextStates);
         return nextStates;
@@ -159,8 +175,12 @@ public class ProcessInstance {
     /**
      * 递归查找后续节点
      */
-    private void findNextStatesRecursive(ProcessDefinition processDefinition, State currentState,
-                                         RuntimeContext context, List<State> result) {
+    private void findNextStatesRecursive(
+            ProcessDefinition processDefinition,
+            State currentState,
+            RuntimeContext context,
+            List<State> result
+    ) {
         if (currentState == null) {
             return;
         }
@@ -171,31 +191,67 @@ public class ProcessInstance {
         } else if (currentState.isParallelEndGatewayState()) {
             handleParallelEndGateway(processDefinition, currentState, context, result);
         } else {
+            // 如果找的的步骤是任务节点或者是子流程节点（主流程的），则返回出去。子流程节点的再次转发交由ProcessEngine处理
             if (currentState.isTaskState() || currentState.isSubProcessState()) {
                 result.add(currentState);
             }
         }
     }
 
-    private void handleParallelEndGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
+    private void handleParallelEndGateway(
+            ProcessDefinition processDefinition,
+            State gatewayState,
+            RuntimeContext context,
+            List<State> states
+    ) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
-        StateIdentifier gatewayStateIdentifier = StateIdentifier.buildFromIdentifiers(processDefinition.getIdentifier(), gatewayState.getId());
-        List<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayStateIdentifier, context.getVariables(), context.getBusinessId()));
+        StateIdentifier gatewayStateIdentifier = StateIdentifier.buildFromIdentifiers(
+                processDefinition.getIdentifier(), gatewayState.getId()
+        );
+        List<State> nextStates = gateway.execute(new RuntimeContext(
+                processDefinition,
+                gatewayStateIdentifier,
+                context.getVariables(),
+                context.getBusinessId()
+        ));
         nextStates.forEach(state -> {
             if (gatewayState == state) {
-                result.add(state);
+                states.add(state);
             } else {
-                findNextStatesRecursive(processDefinition, state, context, result);
+                findNextStatesRecursive(
+                        processDefinition,
+                        state,
+                        context,
+                        states
+                );
             }
         });
     }
 
-    private void handleGateway(ProcessDefinition processDefinition, State gatewayState, RuntimeContext context, List<State> result) {
+    private void handleGateway(
+            ProcessDefinition processDefinition,
+            State gatewayState,
+            RuntimeContext context,
+            List<State> result
+    ) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
-        StateIdentifier gatewayStateIdentifier = StateIdentifier.buildFromIdentifiers(processDefinition.getIdentifier(), gatewayState.getId());
-        List<State> nextStates = gateway.execute(new RuntimeContext(processDefinition, gatewayStateIdentifier, context.getVariables(), context.getBusinessId()));
+        StateIdentifier gatewayStateIdentifier = StateIdentifier.buildFromIdentifiers(
+                processDefinition.getIdentifier(),
+                gatewayState.getId()
+        );
+        List<State> nextStates = gateway.execute(new RuntimeContext(
+                processDefinition,
+                gatewayStateIdentifier,
+                context.getVariables(),
+                context.getBusinessId()
+        ));
         nextStates.forEach(state -> {
-            findNextStatesRecursive(processDefinition, state, context, result);
+            findNextStatesRecursive(
+                    processDefinition,
+                    state,
+                    context,
+                    result
+            );
         });
     }
 
@@ -206,29 +262,29 @@ public class ProcessInstance {
 //    public State getStateToStateParallelGatewayState(String fromStateId, String toStateId) {
 //        State from = processDefinition.getState(fromStateId);
 //    }
-
-    private State test(State from, String toStateId) {
-        if (from.isTaskState() && from.getNextStateId().equals(toStateId)) {
-            return null;
-        } else if (from.isTaskState() && !from.getNextStateId().equals(toStateId)) {
-            State state = processDefinition.getState(from.getNextStateId());
-            return test(state, toStateId);
-        } else if (from.isParallelStartGatewayState() &&
-                from.getConditions().stream().map(Condition::getNextStateId).collect(Collectors.toList()).contains(toStateId)) {
-            return from;
-        } else if (from.isParallelStartGatewayState() &&
-                !from.getConditions().stream().map(Condition::getNextStateId).collect(Collectors.toList()).contains(toStateId)) {
-            for (Condition condition : from.getConditions()) {
-                State state = processDefinition.getState(condition.getNextStateId());
-                State gatewayState = test(state, toStateId);
-                if (gatewayState == null) {
-                    continue;
-                }
-                return gatewayState;
-            }
-        }
-        return null;
-    }
+//
+//    private State test(State from, String toStateId) {
+//        if (from.isTaskState() && from.getNextStateId().equals(toStateId)) {
+//            return null;
+//        } else if (from.isTaskState() && !from.getNextStateId().equals(toStateId)) {
+//            State state = processDefinition.getState(from.getNextStateId());
+//            return test(state, toStateId);
+//        } else if (from.isParallelStartGatewayState() &&
+//                from.getConditions().stream().map(Condition::getNextStateId).collect(Collectors.toList()).contains(toStateId)) {
+//            return from;
+//        } else if (from.isParallelStartGatewayState() &&
+//                !from.getConditions().stream().map(Condition::getNextStateId).collect(Collectors.toList()).contains(toStateId)) {
+//            for (Condition condition : from.getConditions()) {
+//                State state = processDefinition.getState(condition.getNextStateId());
+//                State gatewayState = test(state, toStateId);
+//                if (gatewayState == null) {
+//                    continue;
+//                }
+//                return gatewayState;
+//            }
+//        }
+//        return null;
+//    }
 
 
 }
