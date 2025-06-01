@@ -20,11 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * 默认事务流程引擎
- * <p>
- * 适用于:时间跨度短（通常是毫秒到秒级别），事务的范围局限在单个数据库或服务中
- */
+
 @Slf4j
 public class ProcessEngine {
 
@@ -40,22 +36,32 @@ public class ProcessEngine {
         this.flowYamlFiles = builder.flowYamlFiles;
         this.processRejectionHandler = builder.rejectionHandler;
         this.processWithdrawHandler = builder.withdrawHandler;
+        loadWorkflow();
+    }
+
+    private void loadWorkflow() {
         ClasspathFlowFileLoader loader = new ClasspathFlowFileLoader();
         List<String> flows = loader.loadFilesFromFlowFolder();
+        flows.forEach(content -> {
+            String processIdentifier = registerProcessInstance(
+                    ProcessInstance.load(
+                            content,
+                            this.evaluator == null ? DefaultEvaluator.build() : this.evaluator
+                    )
+            );
+            log.info("register process: [{}] succeeded", processIdentifier);
+        });
         if (CollUtils.isNotEmpty(flowYamlFiles)) {
             flowYamlFiles.forEach(flowYamlFile -> {
-                String processIdentifier = registerProcessInstance(ProcessInstance.loadYaml(
-                        flowYamlFile, this.evaluator == null ? DefaultEvaluator.build() : builder.evaluator)
+                String processIdentifier = registerProcessInstance(
+                        ProcessInstance.loadYaml(
+                                flowYamlFile,
+                                this.evaluator == null ? DefaultEvaluator.build() : this.evaluator
+                        )
                 );
                 log.info("register process: [{}] succeeded", processIdentifier);
             });
         }
-        flows.forEach(content -> {
-            String processIdentifier = registerProcessInstance(ProcessInstance.load(
-                    content, this.evaluator == null ? DefaultEvaluator.build() : builder.evaluator)
-            );
-            log.info("register process: [{}] succeeded", processIdentifier);
-        });
     }
 
     private String registerProcessInstance(ProcessInstance instance) {
@@ -72,13 +78,23 @@ public class ProcessEngine {
      *
      * @return
      */
-    public StateIdentifier callBack(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
+    public StateIdentifier withdraw(
+            StateIdentifier currentStateIdentifier,
+            Map<String, Object> variables,
+            String businessId
+    ) {
         if (this.processWithdrawHandler == null) {
             throw new ProcessException("流程撤回功能未配置");
         }
-        State state = this.getState(currentStateIdentifier.getCurrentStateProcessIdentifier(), currentStateIdentifier.getCurrentStateId());
-        ProcessInstance instance = this.getProcessInstance(currentStateIdentifier.getCurrentStateProcessIdentifier());
-        RuntimeContext context = new RuntimeContext(instance.getProcessDefinition(), currentStateIdentifier, variables, businessId);
+        ProcessInstance instance = this.getProcessInstance(
+                currentStateIdentifier.getCurrentStateProcessIdentifier()
+        );
+        RuntimeContext context = new RuntimeContext(
+                instance.getProcessDefinition(),
+                currentStateIdentifier,
+                variables,
+                businessId
+        );
         return this.processWithdrawHandler.withdraw(context);
     }
 
@@ -89,14 +105,23 @@ public class ProcessEngine {
      * @param businessId
      * @return
      */
-    public List<StateIdentifier> rollback(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
+    public List<StateIdentifier> reject(
+            StateIdentifier currentStateIdentifier,
+            Map<String, Object> variables,
+            String businessId
+    ) {
         if (this.processRejectionHandler == null) {
             throw new ProcessException("流程回退功能未配置");
         }
-        State state = this.getState(currentStateIdentifier.getCurrentStateProcessIdentifier(), currentStateIdentifier.getCurrentStateId());
-        List<String> classProcessors = state.getHandlers();
-        ProcessInstance instance = this.getProcessInstance(currentStateIdentifier.getCurrentStateProcessIdentifier());
-        RuntimeContext context = new RuntimeContext(instance.getProcessDefinition(), currentStateIdentifier, variables, businessId);
+        ProcessInstance instance = this.getProcessInstance(
+                currentStateIdentifier.getCurrentStateProcessIdentifier()
+        );
+        RuntimeContext context = new RuntimeContext(
+                instance.getProcessDefinition(),
+                currentStateIdentifier,
+                variables,
+                businessId
+        );
         return this.processRejectionHandler.reject(context);
     }
 
@@ -142,14 +167,22 @@ public class ProcessEngine {
      * @param businessId
      * @return
      */
-    public ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
-        ComplexProcessResult result = doProcess(currentStateIdentifier, variables, businessId);
+    public ComplexProcessResult process(
+            StateIdentifier currentStateIdentifier,
+            Map<String, Object> variables,
+            String businessId
+    ) {
+        ComplexProcessResult result = processRecursive(currentStateIdentifier, variables, businessId);
         result.setCurrentStateIdentifier(currentStateIdentifier);
         result.setResult(variables.get(ProcessConstant.STATE_PROCESS_RESULT));
         return result;
     }
 
-    private ComplexProcessResult doProcess(StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
+    private ComplexProcessResult processRecursive(
+            StateIdentifier currentStateIdentifier,
+            Map<String, Object> variables,
+            String businessId
+    ) {
         ProcessInstance instance = getProcessInstance(
                 currentStateIdentifier.getCurrentStateProcessIdentifier()
         );
@@ -164,7 +197,7 @@ public class ProcessEngine {
                     currentStateIdentifier.getParentProcessIdentifier(),
                     currentStateIdentifier.getSubProcessStateId()
             );
-            return doProcess(
+            return processRecursive(
                     StateIdentifier.buildFromFullPaths(
                             currentStateIdentifier.getParentProcessFullPaths(),
                             subProcessState.getNextStateId()
