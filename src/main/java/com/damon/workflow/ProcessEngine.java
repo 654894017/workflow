@@ -11,7 +11,8 @@ import com.damon.workflow.handler.IProcessRejectionHandler;
 import com.damon.workflow.handler.IProcessWithdrawHandler;
 import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.classpath.ClasspathFlowFileLoader;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-@Slf4j
 public class ProcessEngine {
+    private final Logger log = LoggerFactory.getLogger(ProcessEngine.class);
 
     private Map<String, ProcessInstance> instanceMap = new ConcurrentHashMap<>();
     private IEvaluator evaluator;
@@ -133,7 +134,10 @@ public class ProcessEngine {
      * @param variables
      * @return
      */
-    public ComplexProcessResult process(String processIdentifier, Map<String, Object> variables) {
+    public ComplexProcessResult process(
+            String processIdentifier,
+            Map<String, Object> variables
+    ) {
         return process(processIdentifier, variables, null);
     }
 
@@ -146,7 +150,11 @@ public class ProcessEngine {
      * @param businessId
      * @return
      */
-    public ComplexProcessResult process(String processIdentifier, Map<String, Object> variables, String businessId) {
+    public ComplexProcessResult process(
+            String processIdentifier,
+            Map<String, Object> variables,
+            String businessId
+    ) {
         ProcessInstance instance = getProcessInstance(processIdentifier);
         ProcessDefinition processDefinition = instance.getProcessDefinition();
         return process(StateIdentifier.buildFromIdentifiers(processIdentifier, processDefinition.getStartStateId()), variables, businessId);
@@ -157,7 +165,10 @@ public class ProcessEngine {
      * @param variables
      * @return
      */
-    public ComplexProcessResult process(StateIdentifier currentStateIdentifier, Map<String, Object> variables) {
+    public ComplexProcessResult process(
+            StateIdentifier currentStateIdentifier,
+            Map<String, Object> variables
+    ) {
         return process(currentStateIdentifier, variables, null);
     }
 

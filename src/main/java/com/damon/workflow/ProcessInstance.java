@@ -205,12 +205,12 @@ public class ProcessInstance {
             List<State> states
     ) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
-        StateIdentifier gatewayStateIdentifier = StateIdentifier.buildFromIdentifiers(
+        StateIdentifier identifier = StateIdentifier.buildFromIdentifiers(
                 processDefinition.getIdentifier(), gatewayState.getId()
         );
         List<State> nextStates = gateway.execute(new RuntimeContext(
                 processDefinition,
-                gatewayStateIdentifier,
+                identifier,
                 context.getVariables(),
                 context.getBusinessId()
         ));
@@ -235,13 +235,13 @@ public class ProcessInstance {
             List<State> result
     ) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
-        StateIdentifier gatewayStateIdentifier = StateIdentifier.buildFromIdentifiers(
+        StateIdentifier identifier = StateIdentifier.buildFromIdentifiers(
                 processDefinition.getIdentifier(),
                 gatewayState.getId()
         );
         List<State> nextStates = gateway.execute(new RuntimeContext(
                 processDefinition,
-                gatewayStateIdentifier,
+                identifier,
                 context.getVariables(),
                 context.getBusinessId()
         ));

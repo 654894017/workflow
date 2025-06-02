@@ -1,10 +1,9 @@
 package com.damon.workflow.task.impl;
 
 
+import com.damon.workflow.ProcessConstant;
 import com.damon.workflow.evaluator.IEvaluator;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class StartTask extends GeneralTask {
 
     public StartTask(IEvaluator evaluator) {
@@ -13,6 +12,6 @@ public class StartTask extends GeneralTask {
 
     @Override
     public String getName() {
-        return "Start";
+        return ProcessConstant.START;
     }
 }

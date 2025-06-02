@@ -1,7 +1,5 @@
 package com.damon.workflow.config;
 
-import lombok.Data;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,7 +7,6 @@ import java.util.stream.Collectors;
 /**
  *
  */
-@Data
 public class StateIdentifier {
 
     private static final String SEPARATOR = ">";

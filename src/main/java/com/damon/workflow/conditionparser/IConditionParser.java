@@ -1,4 +1,4 @@
-package com.damon.workflow.condition_parser;
+package com.damon.workflow.conditionparser;
 
 import com.damon.workflow.RuntimeContext;
 

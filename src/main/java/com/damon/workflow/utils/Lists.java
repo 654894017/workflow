@@ -11,4 +11,8 @@ public class Lists {
         return list;
     }
 
+    public static <T> List<T> createEmptyList() {
+        return new ArrayList<>(0);
+    }
+
 }

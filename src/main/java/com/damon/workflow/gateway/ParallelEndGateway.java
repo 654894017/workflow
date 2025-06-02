@@ -2,24 +2,27 @@ package com.damon.workflow.gateway;
 
 import com.damon.workflow.ProcessConstant;
 import com.damon.workflow.RuntimeContext;
-import com.damon.workflow.condition_parser.IConditionParser;
+import com.damon.workflow.conditionparser.IConditionParser;
 import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.spring.ApplicationContextHelper;
 import com.damon.workflow.utils.StrUtils;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
-@RequiredArgsConstructor
 public class ParallelEndGateway implements IGateway {
+    private final Logger log = LoggerFactory.getLogger(ParallelEndGateway.class);
 
     private final IEvaluator evaluator;
+
+    public ParallelEndGateway(IEvaluator evaluator) {
+        this.evaluator = evaluator;
+    }
 
     @Override
     public List<State> execute(RuntimeContext context) {
@@ -54,6 +57,6 @@ public class ParallelEndGateway implements IGateway {
 
     @Override
     public String getName() {
-        return "ParallelEndGateway";
+        return ProcessConstant.PARALLEL_END_GATEWAY;
     }
 }

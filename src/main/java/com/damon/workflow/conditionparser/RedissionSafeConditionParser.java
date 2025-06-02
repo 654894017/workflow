@@ -1,19 +1,23 @@
-package com.damon.workflow.condition_parser;
+package com.damon.workflow.conditionparser;
 
 import com.damon.workflow.RuntimeContext;
 import com.damon.workflow.config.StateIdentifier;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.utils.StrUtils;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@RequiredArgsConstructor
-@Slf4j
+
 public abstract class RedissionSafeConditionParser implements IConditionParser {
+    private final Logger log = LoggerFactory.getLogger(RedissionSafeConditionParser.class);
 
     private final RedissonClient redissonClient;
+
+    public RedissionSafeConditionParser(RedissonClient redissonClient) {
+        this.redissonClient = redissonClient;
+    }
 
     @Override
     public boolean test(RuntimeContext context) {

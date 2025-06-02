@@ -10,28 +10,31 @@ import com.damon.workflow.handler.IProcessStateHandler;
 import com.damon.workflow.spring.ApplicationContextHelper;
 import com.damon.workflow.task.ITask;
 import com.damon.workflow.utils.CollUtils;
-import lombok.extern.slf4j.Slf4j;
+import com.damon.workflow.utils.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 public class EndTask implements ITask {
+
+    private final Logger log = LoggerFactory.getLogger(EndTask.class);
+
     @Override
     public List<State> execute(RuntimeContext context) {
         ProcessDefinition processDefinition = context.getProcessDefinition();
-        State currentState = processDefinition.getState(context.getCurrentStateIdentifier().getCurrentStateId());
-        log.info("processId: {}, {}: {} is finshed, variables: {}",
-                processDefinition.getIdentifier(), getName(), currentState.getId(), currentState.getNextStateId(),
+        State state = processDefinition.getState(context.getCurrentStateIdentifier().getCurrentStateId());
+        log.info("ProcessId: {}, {}: {} is finshed, variables: {}",
+                processDefinition.getIdentifier(), getName(), state.getId(), state.getNextStateId(),
                 context.getVariables());
-        if (CollUtils.isNotEmpty(currentState.getHandlers())) {
-            currentState.getHandlers().forEach(processorClassName ->
+        if (CollUtils.isNotEmpty(state.getHandlers())) {
+            state.getHandlers().forEach(processorClassName ->
                     // 执行当前状态处理逻辑
-                    processState(processorClassName, currentState, context)
+                    processState(processorClassName, state, context)
             );
         }
-        return new ArrayList<>(0);
+        return Lists.createEmptyList();
     }
 
     private void processState(String processorClassName, State currentState, RuntimeContext context) {
@@ -51,6 +54,6 @@ public class EndTask implements ITask {
 
     @Override
     public String getName() {
-        return "End";
+        return ProcessConstant.END;
     }
 }

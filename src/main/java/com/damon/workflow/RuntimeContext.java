@@ -12,7 +12,12 @@ public class RuntimeContext {
     private final Map<String, Object> variables;
     private final String businessId;
 
-    public RuntimeContext(ProcessDefinition processDefinition, StateIdentifier currentStateIdentifier, Map<String, Object> variables, String businessId) {
+    public RuntimeContext(
+            ProcessDefinition processDefinition,
+            StateIdentifier currentStateIdentifier,
+            Map<String, Object> variables,
+            String businessId
+    ) {
         this.businessId = businessId;
         this.processDefinition = processDefinition;
         this.currentStateIdentifier = currentStateIdentifier;

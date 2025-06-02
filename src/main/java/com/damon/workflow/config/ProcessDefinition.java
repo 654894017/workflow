@@ -2,13 +2,10 @@ package com.damon.workflow.config;
 
 import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.StrUtils;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.*;
 
-@Getter
-@Setter
+
 public class ProcessDefinition {
     private String id;
     private String version;
@@ -27,11 +24,6 @@ public class ProcessDefinition {
                 .orElseThrow(() -> new IllegalArgumentException("State not found: " + id));
     }
 
-    public void setStates(List<State> states) {
-        this.stateInverseRelationMap = createStateInverseRelation(states);
-        this.states = states;
-    }
-
     public Map<String, Set<String>> getStateInverseRelation() {
         return stateInverseRelationMap;
     }
@@ -47,14 +39,18 @@ public class ProcessDefinition {
         for (State state : states) {
             String nextStateId = state.getNextStateId();
             if (StrUtils.isNotEmpty(nextStateId)) {
-                Set<String> inputStateIds = stateInverseRelationMap.computeIfAbsent(nextStateId, s -> new HashSet<>());
+                Set<String> inputStateIds = stateInverseRelationMap.computeIfAbsent(
+                        nextStateId, s -> new HashSet<>()
+                );
                 inputStateIds.add(state.getId());
             } else {
                 if (CollUtils.isNotEmpty(state.getConditions())) {
                     for (Condition condition : state.getConditions()) {
                         String conditionNextStateId = condition.getNextStateId();
                         if (StrUtils.isNotEmpty(conditionNextStateId)) {
-                            Set<String> inputStateIds = stateInverseRelationMap.computeIfAbsent(conditionNextStateId, s -> new HashSet<>());
+                            Set<String> inputStateIds = stateInverseRelationMap.computeIfAbsent(
+                                    conditionNextStateId, s -> new HashSet<>()
+                            );
                             inputStateIds.add(state.getId());
                         }
                     }
@@ -62,5 +58,46 @@ public class ProcessDefinition {
             }
         }
         return stateInverseRelationMap;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getStartStateId() {
+        return startStateId;
+    }
+
+    public void setStartStateId(String startStateId) {
+        this.startStateId = startStateId;
+    }
+
+    public List<State> getStates() {
+        return states;
+    }
+
+    public void setStates(List<State> states) {
+        this.stateInverseRelationMap = createStateInverseRelation(states);
+        this.states = states;
+    }
+
+    public Map<String, Set<String>> getStateInverseRelationMap() {
+        return stateInverseRelationMap;
+    }
+
+    public void setStateInverseRelationMap(Map<String, Set<String>> stateInverseRelationMap) {
+        this.stateInverseRelationMap = stateInverseRelationMap;
     }
 }
