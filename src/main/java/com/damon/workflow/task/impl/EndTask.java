@@ -7,7 +7,7 @@ import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.exception.ProcessTaskException;
 import com.damon.workflow.handler.IProcessStateHandler;
-import com.damon.workflow.spring.ApplicationContextHelper;
+import com.damon.workflow.handler.ProcessHandlerFactory;
 import com.damon.workflow.task.ITask;
 import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.Lists;
@@ -38,7 +38,7 @@ public class EndTask implements ITask {
     }
 
     private void processState(String processorClassName, State currentState, RuntimeContext context) {
-        IProcessStateHandler handler = ApplicationContextHelper.getBean(processorClassName);
+        IProcessStateHandler handler = ProcessHandlerFactory.getProcessHandler(processorClassName);
         if (handler != null && handler.isMatch(context)) {
             try {
                 handler.handle(context);

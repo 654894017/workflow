@@ -3,6 +3,7 @@ package com.damon.workflow.task.impl;
 
 import com.damon.workflow.ProcessConstant;
 import com.damon.workflow.RuntimeContext;
+import com.damon.workflow.conditionparser.ConditionParserFactory;
 import com.damon.workflow.conditionparser.IConditionParser;
 import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
@@ -10,7 +11,7 @@ import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
 import com.damon.workflow.exception.ProcessTaskException;
 import com.damon.workflow.handler.IProcessStateHandler;
-import com.damon.workflow.spring.ApplicationContextHelper;
+import com.damon.workflow.handler.ProcessHandlerFactory;
 import com.damon.workflow.task.ITask;
 import com.damon.workflow.utils.CollUtils;
 import com.damon.workflow.utils.StrUtils;
@@ -59,7 +60,7 @@ public class GeneralTask implements ITask {
      * 处理当前状态逻辑
      */
     private void processCurrentState(String processorClassName, RuntimeContext context) {
-        IProcessStateHandler handler = ApplicationContextHelper.getBean(processorClassName);
+        IProcessStateHandler handler = ProcessHandlerFactory.getProcessHandler(processorClassName);
         if (handler != null && handler.isMatch(context)) {
             try {
                 handler.handle(context);
@@ -102,7 +103,7 @@ public class GeneralTask implements ITask {
     private boolean evaluateCondition(RuntimeContext context, State currentState) {
         // 优先使用条件解析器
         if (StrUtils.isNotEmpty(currentState.getNextStateConditionParser())) {
-            IConditionParser conditionParser = ApplicationContextHelper.getBean(currentState.getNextStateConditionParser());
+            IConditionParser conditionParser = ConditionParserFactory.getConditionParser(currentState.getNextStateConditionParser());
             if (conditionParser == null) {
                 throw new ProcessException("未找到条件解析器: " + currentState.getNextStateConditionParser());
             }
