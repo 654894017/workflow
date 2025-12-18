@@ -1,5 +1,7 @@
 package com.damon.workflow.utils.classpath;
 
+import com.damon.workflow.exception.ProcessException;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,14 +15,14 @@ public class ClasspathFileUtils {
      *
      * @param filePath classpath中的文件路径
      * @return 文件内容
-     * @throws RuntimeException 如果文件读取失败
+     * @throws ProcessException 如果文件读取失败
      */
     public static String readFileAsString(String filePath) {
         try (InputStream inputStream = getResourceAsStream(filePath);
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             return reader.lines().collect(Collectors.joining(System.lineSeparator()));
         } catch (Exception e) {
-            throw new RuntimeException("Failed to read file from classpath: " + filePath, e);
+            throw new ProcessException("Failed to read file from classpath: " + filePath, e);
         }
     }
 
@@ -29,12 +31,12 @@ public class ClasspathFileUtils {
      *
      * @param filePath classpath中的文件路径
      * @return 文件的输入流
-     * @throws RuntimeException 如果文件未找到
+     * @throws ProcessException 如果文件未找到
      */
     private static InputStream getResourceAsStream(String filePath) {
         InputStream inputStream = ClasspathFileUtils.class.getClassLoader().getResourceAsStream(filePath);
         if (inputStream == null) {
-            throw new RuntimeException("File not found in classpath: " + filePath);
+            throw new ProcessException("File not found in classpath: " + filePath);
         }
         return inputStream;
     }

@@ -2,13 +2,13 @@ package com.damon.workflow.gateway;
 
 import com.damon.workflow.ProcessConstant;
 import com.damon.workflow.RuntimeContext;
+import com.damon.workflow.conditionparser.ConditionParserFactory;
 import com.damon.workflow.conditionparser.IConditionParser;
 import com.damon.workflow.config.Condition;
 import com.damon.workflow.config.ProcessDefinition;
 import com.damon.workflow.config.State;
 import com.damon.workflow.evaluator.IEvaluator;
 import com.damon.workflow.exception.ProcessException;
-import com.damon.workflow.spring.ApplicationContextHelper;
 import com.damon.workflow.utils.StrUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class ParallelStartGateway implements IGateway {
         for (Condition condition : state.getConditions()) {
             boolean result;
             if (StrUtils.isNotEmpty(condition.getNextStateConditionParser())) {
-                IConditionParser conditionParser = ApplicationContextHelper.getBean(condition.getNextStateConditionParser());
+                IConditionParser conditionParser = ConditionParserFactory.getConditionParser(condition.getNextStateConditionParser());
                 if (conditionParser == null) {
                     throw new ProcessException("未找到条件解析器: " + condition.getNextStateConditionParser());
                 }

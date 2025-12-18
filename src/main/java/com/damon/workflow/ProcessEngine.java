@@ -157,7 +157,11 @@ public class ProcessEngine {
     ) {
         ProcessInstance instance = getProcessInstance(processIdentifier);
         ProcessDefinition processDefinition = instance.getProcessDefinition();
-        return process(StateIdentifier.buildFromIdentifiers(processIdentifier, processDefinition.getStartStateId()), variables, businessId);
+        StateIdentifier identifier = StateIdentifier.buildFromIdentifiers(
+                processIdentifier,
+                processDefinition.getStartStateId()
+        );
+        return process(identifier, variables, businessId);
     }
 
     /**

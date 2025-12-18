@@ -1,5 +1,6 @@
 package com.damon.workflow.spring;
 
+import com.damon.workflow.exception.ProcessException;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -19,7 +20,7 @@ public class ApplicationContextHelper implements ApplicationContextAware {
             try {
                 return Class.forName(key);
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Class not found: " + key, e);
+                throw new ProcessException("Class not found: " + key, e);
             }
         });
     }
