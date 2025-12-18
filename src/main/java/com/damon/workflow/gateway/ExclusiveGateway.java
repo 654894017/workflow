@@ -26,7 +26,7 @@ public class ExclusiveGateway implements IGateway {
 
     @Override
     public List<State> execute(RuntimeContext context) {
-        ProcessDefinition processDefinition = context.getProcessDefinition();
+        ProcessDefinition processDefinition = context.getDefinition();
         State gatewayState = processDefinition.getState(context.getCurrentStateIdentifier().getCurrentStateId());
         List<State> nextStates = new ArrayList<>();
         for (Condition condition : gatewayState.getConditions()) {

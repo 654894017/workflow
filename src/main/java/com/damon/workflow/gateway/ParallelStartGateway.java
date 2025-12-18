@@ -29,8 +29,8 @@ public class ParallelStartGateway implements IGateway {
     @Override
     public List<State> execute(RuntimeContext context) {
         List<State> nextStates = new ArrayList<>();
-        State state = context.getProcessDefinition().getState(context.getCurrentStateIdentifier().getCurrentStateId());
-        ProcessDefinition processDefinition = context.getProcessDefinition();
+        State state = context.getDefinition().getState(context.getCurrentStateIdentifier().getCurrentStateId());
+        ProcessDefinition processDefinition = context.getDefinition();
         for (Condition condition : state.getConditions()) {
             boolean result;
             if (StrUtils.isNotEmpty(condition.getNextStateConditionParser())) {

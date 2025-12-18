@@ -23,7 +23,7 @@ public class EndTask implements ITask {
 
     @Override
     public List<State> execute(RuntimeContext context) {
-        ProcessDefinition processDefinition = context.getProcessDefinition();
+        ProcessDefinition processDefinition = context.getDefinition();
         State state = processDefinition.getState(context.getCurrentStateIdentifier().getCurrentStateId());
         log.info("ProcessId: {}, {}: {} is finshed, variables: {}",
                 processDefinition.getIdentifier(), getName(), state.getId(), state.getNextStateId(),
@@ -45,7 +45,7 @@ public class EndTask implements ITask {
                 Map<String, Object> variables = context.getVariables();
                 context.setResult(variables.get(ProcessConstant.STATE_PROCESS_RESULT));
             } catch (Exception e) {
-                log.error("流程ID: {}, 当前状态: {} 处理失败", context.getProcessDefinition().getIdentifier(),
+                log.error("流程ID: {}, 当前状态: {} 处理失败", context.getDefinition().getIdentifier(),
                         context.getCurrentStateIdentifier().getFullPaths(), e);
                 throw new ProcessTaskException(context.getCurrentStateIdentifier(), e);
             }

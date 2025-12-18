@@ -26,7 +26,7 @@ public class ParallelEndGateway implements IGateway {
 
     @Override
     public List<State> execute(RuntimeContext context) {
-        ProcessDefinition processDefinition = context.getProcessDefinition();
+        ProcessDefinition processDefinition = context.getDefinition();
         State currentState = processDefinition.getState(context.getCurrentStateIdentifier().getCurrentStateId());
         List<State> nextStates = new ArrayList<>();
         boolean result;

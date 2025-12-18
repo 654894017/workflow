@@ -33,7 +33,7 @@ public class GeneralTask implements ITask {
 
     @Override
     public List<State> execute(RuntimeContext context) {
-        ProcessDefinition processDefinition = context.getProcessDefinition();
+        ProcessDefinition processDefinition = context.getDefinition();
         State currentState = processDefinition.getState(context.getCurrentStateIdentifier().getCurrentStateId());
         if (CollUtils.isNotEmpty(currentState.getHandlers())) {
             currentState.getHandlers().forEach(processorClassName ->
@@ -67,7 +67,7 @@ public class GeneralTask implements ITask {
                 Map<String, Object> variables = context.getVariables();
                 context.setResult(variables.get(ProcessConstant.STATE_PROCESS_RESULT));
             } catch (Exception e) {
-                log.error("流程ID: {}, 当前状态: {} 处理失败", context.getProcessDefinition().getIdentifier(),
+                log.error("流程ID: {}, 当前状态: {} 处理失败", context.getDefinition().getIdentifier(),
                         context.getCurrentStateIdentifier().getFullPaths(), e);
                 throw new ProcessTaskException(context.getCurrentStateIdentifier(), e);
             }
@@ -105,7 +105,7 @@ public class GeneralTask implements ITask {
         if (StrUtils.isNotEmpty(currentState.getNextStateConditionParser())) {
             IConditionParser conditionParser = ConditionParserFactory.getConditionParser(currentState.getNextStateConditionParser());
             if (conditionParser == null) {
-                throw new ProcessException("未找到条件解析器: " + currentState.getNextStateConditionParser());
+                throw new ProcessException("No script executor was found: " + currentState.getNextStateConditionParser());
             }
             return conditionParser.test(context);
         }
@@ -116,7 +116,7 @@ public class GeneralTask implements ITask {
                     ? ProcessConstant.DEFAULT_EVALUATOR
                     : currentState.getNextStateConditionScriptType();
             if (evaluator == null) {
-                throw new ProcessException("未找到脚本执行器: " + scriptType);
+                throw new ProcessException("No script executor was found: " + scriptType);
             }
             return evaluator.evaluate(currentState.getNextStateCondition(), scriptType, context);
         }

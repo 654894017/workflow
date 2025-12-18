@@ -6,20 +6,25 @@ import com.damon.workflow.config.StateIdentifier;
 
 import java.util.Map;
 
+/**
+ * 流程上下文
+ * <p>
+ * damon
+ */
 public class RuntimeContext {
-    private final ProcessDefinition processDefinition;
+    private final ProcessDefinition definition;
     private final StateIdentifier currentStateIdentifier;
     private final Map<String, Object> variables;
     private final String businessId;
 
     public RuntimeContext(
-            ProcessDefinition processDefinition,
+            ProcessDefinition definition,
             StateIdentifier currentStateIdentifier,
             Map<String, Object> variables,
             String businessId
     ) {
         this.businessId = businessId;
-        this.processDefinition = processDefinition;
+        this.definition = definition;
         this.currentStateIdentifier = currentStateIdentifier;
         this.variables = variables;
     }
@@ -32,8 +37,8 @@ public class RuntimeContext {
         variables.put(currentStateIdentifier.getFullPaths(), result);
     }
 
-    public ProcessDefinition getProcessDefinition() {
-        return processDefinition;
+    public ProcessDefinition getDefinition() {
+        return definition;
     }
 
     public StateIdentifier getCurrentStateIdentifier() {

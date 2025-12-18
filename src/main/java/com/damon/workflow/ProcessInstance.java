@@ -147,95 +147,66 @@ public class ProcessInstance {
     /**
      * 查找当前节点的所有可能后续节点
      *
-     * @param processDefinition
-     * @param currentState      当前节点ID
-     * @param context           执行上下文，包括条件变量等
+     * @param definition
+     * @param currentState 当前节点ID
+     * @param context      执行上下文，包括条件变量等
      * @return 后续所有待执行的节点集合
      */
-    private List<State> findNextStates(
-            ProcessDefinition processDefinition,
-            State currentState,
-            RuntimeContext context
-    ) {
+    private List<State> findNextStates(ProcessDefinition definition, State currentState, RuntimeContext context) {
         List<State> nextStates = new ArrayList<>();
-        findNextStatesRecursive(processDefinition, currentState, context, nextStates);
+        findNextStatesRecursive(definition, currentState, context, nextStates);
         return nextStates;
     }
 
     /**
      * 递归查找后续节点
      */
-    private void findNextStatesRecursive(
-            ProcessDefinition processDefinition,
-            State currentState,
-            RuntimeContext context,
-            List<State> result
-    ) {
-        if (currentState == null) {
+    private void findNextStatesRecursive(ProcessDefinition definition, State state, RuntimeContext context, List<State> result) {
+        if (state == null) {
             return;
         }
-        if (currentState.isExclusiveGatewayState()) {
-            handleGateway(processDefinition, currentState, context, result);
-        } else if (currentState.isParallelStartGatewayState()) {
-            handleGateway(processDefinition, currentState, context, result);
-        } else if (currentState.isParallelEndGatewayState()) {
-            handleParallelEndGateway(processDefinition, currentState, context, result);
+        if (state.isExclusiveGatewayState()) {
+            handleGateway(definition, state, context, result);
+        } else if (state.isParallelStartGatewayState()) {
+            handleGateway(definition, state, context, result);
+        } else if (state.isParallelEndGatewayState()) {
+            handleParallelEndGateway(definition, state, context, result);
         } else {
             // 如果找的的步骤是任务节点或者是子流程节点（主流程的），则返回出去。子流程节点的再次转发交由ProcessEngine处理
-            if (currentState.isTaskState() || currentState.isSubProcessState()) {
-                result.add(currentState);
+            if (state.isTaskState() || state.isSubProcessState()) {
+                result.add(state);
             }
         }
     }
 
-    private void handleParallelEndGateway(
-            ProcessDefinition processDefinition,
-            State gatewayState,
-            RuntimeContext context,
-            List<State> states
-    ) {
+    private void handleParallelEndGateway(ProcessDefinition definition, State gatewayState, RuntimeContext context, List<State> states) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
         StateIdentifier identifier = StateIdentifier.buildFromIdentifiers(
-                processDefinition.getIdentifier(), gatewayState.getId()
+                definition.getIdentifier(), gatewayState.getId()
         );
-        List<State> nextStates = gateway.execute(new RuntimeContext(
-                processDefinition,
-                identifier,
-                context.getVariables(),
-                context.getBusinessId()
-        ));
+        List<State> nextStates = gateway.execute(
+                new RuntimeContext(definition, identifier, context.getVariables(), context.getBusinessId())
+        );
         nextStates.forEach(state -> {
             if (gatewayState == state) {
                 states.add(state);
             } else {
-                findNextStatesRecursive(
-                        processDefinition,
-                        state,
-                        context,
-                        states
-                );
+                findNextStatesRecursive(definition, state, context, states);
             }
         });
     }
 
-    private void handleGateway(
-            ProcessDefinition processDefinition,
-            State gatewayState,
-            RuntimeContext context,
-            List<State> result
-    ) {
+    private void handleGateway(ProcessDefinition definition, State gatewayState, RuntimeContext context, List<State> result) {
         IGateway gateway = gatewayMap.get(gatewayState.getType());
         StateIdentifier identifier = StateIdentifier.buildFromIdentifiers(
-                processDefinition.getIdentifier(),
+                definition.getIdentifier(),
                 gatewayState.getId()
         );
-        RuntimeContext context1 = new RuntimeContext(
-                processDefinition, identifier, context.getVariables(),
-                context.getBusinessId()
+        List<State> nextStates = gateway.execute(
+                new RuntimeContext(definition, identifier, context.getVariables(), context.getBusinessId())
         );
-        List<State> nextStates = gateway.execute(context1);
         nextStates.forEach(state -> {
-            findNextStatesRecursive(processDefinition, state, context, result);
+            findNextStatesRecursive(definition, state, context, result);
         });
     }
 
