@@ -98,10 +98,7 @@ public class ProcessInstance {
         }
         RuntimeContext context = new RuntimeContext(
                 processDefinition,
-                StateIdentifier.buildFromIdentifiers(
-                        processDefinition.getIdentifier(),
-                        currentStateId
-                ),
+                StateIdentifier.buildFromIdentifiers(processDefinition.getIdentifier(), currentStateId),
                 variables, businessId
         );
         List<State> taskNextStates;
@@ -134,15 +131,8 @@ public class ProcessInstance {
         if (isCompleted) {
             ITask endTask = taskMap.get(nextStates.get(0).getType());
             State state = nextStates.get(0);
-            StateIdentifier endStateIdentifier = StateIdentifier.buildFromIdentifiers(
-                    processDefinition.getIdentifier(), state.getId()
-            );
-            endTask.execute(new RuntimeContext(
-                    processDefinition,
-                    endStateIdentifier,
-                    variables,
-                    businessId
-            ));
+            StateIdentifier endStateIdentifier = StateIdentifier.buildFromIdentifiers(processDefinition.getIdentifier(), state.getId());
+            endTask.execute(new RuntimeContext(processDefinition, endStateIdentifier, variables, businessId));
         }
         return new ProcessResult(isCompleted, processDefinition.getIdentifier(), currentState, nextStates);
     }
@@ -239,19 +229,13 @@ public class ProcessInstance {
                 processDefinition.getIdentifier(),
                 gatewayState.getId()
         );
-        List<State> nextStates = gateway.execute(new RuntimeContext(
-                processDefinition,
-                identifier,
-                context.getVariables(),
+        RuntimeContext context1 = new RuntimeContext(
+                processDefinition, identifier, context.getVariables(),
                 context.getBusinessId()
-        ));
+        );
+        List<State> nextStates = gateway.execute(context1);
         nextStates.forEach(state -> {
-            findNextStatesRecursive(
-                    processDefinition,
-                    state,
-                    context,
-                    result
-            );
+            findNextStatesRecursive(processDefinition, state, context, result);
         });
     }
 
