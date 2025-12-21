@@ -1,7 +1,11 @@
 package com.damon.workflow.exception;
 
+/**
+ * 脚本执行异常类
+ */
 public class ScriptExecutionException extends ProcessException {
     public ScriptExecutionException() {
+        super();
     }
 
     public ScriptExecutionException(Throwable cause) {
